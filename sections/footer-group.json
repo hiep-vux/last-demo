@@ -14,14 +14,6 @@
     "demo_footer_NEKnTC": {
       "type": "demo-footer",
       "blocks": {
-        "link_XFVEcA": {
-          "type": "link",
-          "settings": {
-            "label": "Product linka",
-            "url": "",
-            "open_new_tab": true
-          }
-        },
         "product_link_app": {
           "type": "link",
           "settings": {
@@ -72,7 +64,6 @@
         }
       },
       "block_order": [
-        "link_XFVEcA",
         "product_link_app",
         "product_link_guide",
         "product_link_pricing",
