@@ -4,17 +4,10 @@
   assign bottom_menu = section.settings.bottom_menu
   assign button_url = section.settings.button_url
   assign demo_items = section.settings.demo_items | newline_to_br | split: '<br />'
-  assign custom_product_links = 0
 
   if button_url == blank
     assign button_url = 'https://apps.shopify.com/product-filter-and-search'
   endif
-
-  for block in section.blocks
-    if block.type == 'link' and block.settings.label != blank and block.settings.url != blank
-      assign custom_product_links = custom_product_links | plus: 1
-    endif
-  endfor
 -%}
 
 <footer
@@ -84,7 +77,7 @@
         {%- for link in product_menu.links -%}
           <a class="demo-store-footer__link" href="{{ link.url }}">{{ link.title | escape }}</a>
         {%- endfor -%}
-      {%- elsif custom_product_links > 0 -%}
+      {%- else -%}
         {%- for block in section.blocks -%}
           {%- if block.type == 'link' and block.settings.label != blank and block.settings.url != blank -%}
             <a
@@ -97,11 +90,6 @@
             </a>
           {%- endif -%}
         {%- endfor -%}
-      {%- else -%}
-        <a class="demo-store-footer__link" href="https://apps.shopify.com/product-filter-and-search" target="_blank" rel="noopener">App listing</a>
-        <a class="demo-store-footer__link" href="https://docs.globo.io/filter" target="_blank" rel="noopener">User guide</a>
-        <a class="demo-store-footer__link" href="https://globo.io/smart-product-filter-search#pricing-plans" target="_blank" rel="noopener">Pricing</a>
-        {% comment %} <a class="demo-store-footer__link" href="https://globo.io/changelog" target="_blank" rel="noopener">Changelog</a> {% endcomment %}
       {%- endif -%}
     </div>
 
@@ -150,9 +138,18 @@
           <a class="demo-store-footer__bottom-link" href="{{ link.url }}">{{ link.title | escape }}</a>
         {%- endfor -%}
       {%- else -%}
-        <a class="demo-store-footer__bottom-link" href="https://globo.io/privacy" target="_blank" rel="noopener">Privacy</a>
-        <a class="demo-store-footer__bottom-link" href="https://globo.io/terms" target="_blank" rel="noopener">Terms</a>
-        <a class="demo-store-footer__bottom-link" href="https://globo.io/support" target="_blank" rel="noopener">Support</a>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'bottom_link' and block.settings.label != blank and block.settings.url != blank -%}
+            <a
+              class="demo-store-footer__bottom-link"
+              href="{{ block.settings.url }}"
+              {% if block.settings.open_new_tab %}target="_blank" rel="noopener"{% endif %}
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.label | escape }}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
       {%- endif -%}
     </nav>
   </div>
@@ -515,7 +512,7 @@
       "type": "link_list",
       "id": "product_menu",
       "label": "Menu source",
-      "info": "Default Globo links are shown when no menu is selected."
+      "info": "The selected menu replaces the product link blocks."
     },
     {
       "type": "header",
@@ -582,7 +579,7 @@
       "type": "link_list",
       "id": "bottom_menu",
       "label": "Bottom menu source",
-      "info": "Default Privacy, Terms and Support links are shown when no menu is selected."
+      "info": "The selected menu replaces the bottom link blocks."
     },
     {
       "type": "header",
@@ -672,12 +669,85 @@
           "default": true
         }
       ]
+    },
+    {
+      "type": "bottom_link",
+      "name": "Bottom link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Link label",
+          "default": "Bottom link"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open in a new tab",
+          "default": true
+        }
+      ]
     }
   ],
-  "max_blocks": 8,
+  "max_blocks": 12,
   "presets": [
     {
-      "name": "Demo footer"
+      "name": "Demo footer",
+      "blocks": [
+        {
+          "type": "link",
+          "settings": {
+            "label": "App listing",
+            "url": "https://apps.shopify.com/product-filter-and-search",
+            "open_new_tab": true
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "User guide",
+            "url": "https://docs.globo.io/filter",
+            "open_new_tab": true
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "Pricing",
+            "url": "https://globo.io/smart-product-filter-search#pricing-plans",
+            "open_new_tab": true
+          }
+        },
+        {
+          "type": "bottom_link",
+          "settings": {
+            "label": "Privacy",
+            "url": "https://globo.io/privacy",
+            "open_new_tab": true
+          }
+        },
+        {
+          "type": "bottom_link",
+          "settings": {
+            "label": "Terms",
+            "url": "https://globo.io/terms",
+            "open_new_tab": true
+          }
+        },
+        {
+          "type": "bottom_link",
+          "settings": {
+            "label": "Support",
+            "url": "https://globo.io/support",
+            "open_new_tab": true
+          }
+        }
+      ]
     }
   ]
 }
