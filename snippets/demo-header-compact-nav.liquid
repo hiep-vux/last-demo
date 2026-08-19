@@ -1,0 +1,18 @@
+{%- if menu != blank -%}
+  <nav
+    class="demo-store-header__compact-nav"
+    aria-label="{{ menu.title | escape }}"
+    data-demo-store-only="{{ store }}"
+    {% if hidden %}hidden{% endif %}
+  >
+    {%- for link in menu.links -%}
+      <a
+        class="demo-store-header__compact-link{% if link.current or link.child_active %} demo-store-header__compact-link--active{% endif %}"
+        href="{{ link.url }}"
+        {% if link.current %}aria-current="page"{% endif %}
+      >
+        {{ link.title | escape }}
+      </a>
+    {%- endfor -%}
+  </nav>
+{%- endif -%}

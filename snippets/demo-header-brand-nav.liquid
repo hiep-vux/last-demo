@@ -1,0 +1,73 @@
+{%- assign brand_name = logo_text | default: fallback_name -%}
+
+<a
+  class="demo-store-header__brand"
+  href="{{ routes.root_url }}"
+  aria-label="{{ brand_name | escape }}"
+  data-demo-store-only="{{ store }}"
+  {% if hidden %}hidden{% endif %}
+>
+  {%- if logo != blank -%}
+    {{-
+      logo
+      | image_url: width: logo_width_2x
+      | image_tag:
+        class: 'demo-store-header__logo',
+        widths: '80, 120, 160, 200, 240, 320',
+        width: logo_width,
+        loading: 'eager',
+        fetchpriority: 'high',
+        alt: brand_name
+    -}}
+  {%- else -%}
+    <span class="demo-store-header__name">
+      {{ brand_name | escape }}
+    </span>
+  {%- endif -%}
+</a>
+
+{%- if menu != blank -%}
+  <nav
+    class="demo-store-header__nav"
+    aria-label="{{ menu.title | escape }}"
+    data-demo-store-only="{{ store }}"
+    {% if hidden %}hidden{% endif %}
+  >
+    <ul class="demo-store-header__menu list-unstyled" role="list">
+      {%- for link in menu.links -%}
+        <li class="demo-store-header__menu-item{% if link.links != blank %} demo-store-header__menu-item--has-children{% endif %}">
+          <a
+            class="demo-store-header__menu-link{% if link.current or link.child_active %} demo-store-header__menu-link--active{% endif %}"
+            href="{{ link.url }}"
+            {% if link.current %}aria-current="page"{% endif %}
+          >
+            {{ link.title | escape }}
+            {%- if link.links != blank -%}
+              <span class="demo-store-header__caret" aria-hidden="true">
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </span>
+            {%- endif -%}
+          </a>
+
+          {%- if link.links != blank -%}
+            <div class="demo-store-header__submenu">
+              <ul class="demo-store-header__submenu-list list-unstyled" role="list">
+                {%- for child_link in link.links -%}
+                  <li>
+                    <a
+                      class="demo-store-header__submenu-link{% if child_link.current %} demo-store-header__submenu-link--active{% endif %}"
+                      href="{{ child_link.url }}"
+                      {% if child_link.current %}aria-current="page"{% endif %}
+                    >
+                      {{ child_link.title | escape }}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+{%- endif -%}

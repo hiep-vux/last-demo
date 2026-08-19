@@ -1,0 +1,115 @@
+{%- liquid
+  assign show_demo_guide_actions = false
+  if request.page_type == 'collection' or request.page_type == 'search'
+    assign show_demo_guide_actions = true
+  endif
+
+  if section.settings.default_store == 'auto'
+    assign sidebar_initial_url = section.settings.auto_sidebar_url
+    assign horizontal_initial_url = section.settings.auto_horizontal_url
+    assign drawer_initial_url = section.settings.auto_drawer_url
+  else
+    assign sidebar_initial_url = section.settings.fashion_sidebar_url
+    assign horizontal_initial_url = section.settings.fashion_horizontal_url
+    assign drawer_initial_url = section.settings.fashion_drawer_url
+  endif
+
+  case section.settings.active_layout
+    when 'horizontal'
+      assign fashion_store_url = section.settings.fashion_horizontal_url
+      assign auto_store_url = section.settings.auto_horizontal_url
+    when 'drawer'
+      assign fashion_store_url = section.settings.fashion_drawer_url
+      assign auto_store_url = section.settings.auto_drawer_url
+    else
+      assign fashion_store_url = section.settings.fashion_sidebar_url
+      assign auto_store_url = section.settings.auto_sidebar_url
+  endcase
+-%}
+
+<div
+  class="gpf-demo-toolbar"
+  data-demo-toolbar
+  data-default-store="{{ section.settings.default_store | default: 'fashion' }}"
+  data-default-device="desktop"
+  data-active-layout="{{ section.settings.active_layout | default: 'sidebar' }}"
+  data-default-search-layout="{{ section.settings.default_search_layout | default: 'overlay' }}"
+  data-guide-label-open="{{ section.settings.hide_guide_label | default: 'Hide guide' | escape }}"
+  data-guide-label-closed="{{ section.settings.show_guide_label | default: 'Show guide' | escape }}"
+  {{ section.shopify_attributes }}
+>
+  <div class="gpf-demo-toolbar__brand">
+    {% if section.settings.logo != blank %}
+      {{ section.settings.logo | image_url: width: 48 | image_tag: class: 'gpf-demo-toolbar__logo', widths: '24,48', width: 24, height: 24, alt: section.settings.brand_name }}
+    {% else %}
+      <img class="gpf-demo-toolbar__logo" src="{{ 'app_icon.webp' | asset_url }}" alt="{{ section.settings.brand_name | default: 'Smart Product Filter & Search' | escape }}" width="24" height="24">
+    {% endif %}
+    <span class="gpf-demo-toolbar__name">{{ section.settings.brand_name | default: 'Smart Product Filter & Search' }}</span>
+    {% if section.settings.badge != blank %}
+      <span class="gpf-demo-toolbar__badge">{{ section.settings.badge }}</span>
+    {% endif %}
+  </div>
+
+  <div class="gpf-demo-toolbar__selects">
+    <label class="gpf-demo-toolbar__select-field" data-demo-toolbar-group="layout">
+      <span class="gpf-demo-toolbar__label">{{ section.settings.layout_label | default: 'Filter' }}</span>
+      <select class="gpf-demo-toolbar__select" data-demo-select="layout" aria-label="{{ section.settings.layout_label | default: 'Filter layout' | escape }}">
+        <option value="sidebar"{% if section.settings.active_layout == 'sidebar' %} selected{% endif %}>{{ section.settings.sidebar_label | default: 'Sidebar' }}</option>
+        <option value="horizontal"{% if section.settings.active_layout == 'horizontal' %} selected{% endif %}>{{ section.settings.horizontal_label | default: 'Horizontal' }}</option>
+        <option value="drawer"{% if section.settings.active_layout == 'drawer' %} selected{% endif %}>{{ section.settings.drawer_label | default: 'Drawer' }}</option>
+      </select>
+    </label>
+
+    <label class="gpf-demo-toolbar__select-field" data-demo-toolbar-group="search-layout">
+      <span class="gpf-demo-toolbar__label">{{ section.settings.search_layout_label | default: 'Search' }}</span>
+      <select class="gpf-demo-toolbar__select" data-demo-select="search-layout" aria-label="{{ section.settings.search_layout_label | default: 'Search layout' | escape }}">
+        <option value="overlay"{% if section.settings.default_search_layout == 'overlay' %} selected{% endif %}>{{ section.settings.search_overlay_label | default: 'Full-width overlay' }}</option>
+        <option value="two-column"{% if section.settings.default_search_layout == 'two-column' %} selected{% endif %}>{{ section.settings.search_two_column_label | default: 'Two column' }}</option>
+        <option value="one-column"{% if section.settings.default_search_layout == 'one-column' %} selected{% endif %}>{{ section.settings.search_one_column_label | default: 'One column' }}</option>
+      </select>
+    </label>
+
+    <label class="gpf-demo-toolbar__select-field" data-demo-toolbar-group="store">
+      <span class="gpf-demo-toolbar__label">{{ section.settings.store_label | default: 'Store' }}</span>
+      <select class="gpf-demo-toolbar__select" data-demo-select="store" aria-label="{{ section.settings.store_label | default: 'Store' | escape }}">
+        <option value="fashion"{% if section.settings.default_store != 'auto' %} selected{% endif %}>{{ section.settings.fashion_label | default: 'Fashion' }}</option>
+        <option value="auto"{% if section.settings.default_store == 'auto' %} selected{% endif %}>{{ section.settings.auto_label | default: 'Auto parts' }}</option>
+      </select>
+    </label>
+
+    {%- unless section.settings.show_view_mode == false -%}
+      <label class="gpf-demo-toolbar__select-field" data-demo-toolbar-group="device">
+        <span class="gpf-demo-toolbar__label">{{ section.settings.device_label | default: 'View' }}</span>
+        <select class="gpf-demo-toolbar__select" data-demo-select="device" aria-label="{{ section.settings.device_label | default: 'Preview device' | escape }}">
+          <option value="desktop" selected>{{ section.settings.desktop_label | default: 'Desktop' }}</option>
+          <option value="mobile">{{ section.settings.mobile_label | default: 'Mobile' }}</option>
+        </select>
+      </label>
+    {%- endunless -%}
+  </div>
+
+  <div class="gpf-demo-toolbar__navigation" hidden aria-hidden="true">
+    <a href="{{ sidebar_initial_url | default: routes.root_url }}" data-demo-layout-link="sidebar" data-fashion-href="{{ section.settings.fashion_sidebar_url | default: routes.root_url }}" data-auto-href="{{ section.settings.auto_sidebar_url | default: routes.root_url }}"{% if section.settings.layout_links_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}></a>
+    <a href="{{ horizontal_initial_url | default: routes.root_url }}" data-demo-layout-link="horizontal" data-fashion-href="{{ section.settings.fashion_horizontal_url | default: routes.root_url }}" data-auto-href="{{ section.settings.auto_horizontal_url | default: routes.root_url }}"{% if section.settings.layout_links_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}></a>
+    <a href="{{ drawer_initial_url | default: routes.root_url }}" data-demo-layout-link="drawer" data-fashion-href="{{ section.settings.fashion_drawer_url | default: routes.root_url }}" data-auto-href="{{ section.settings.auto_drawer_url | default: routes.root_url }}"{% if section.settings.layout_links_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}></a>
+    <a href="{{ fashion_store_url | default: routes.root_url }}" data-demo-control="store" data-demo-value="fashion" data-demo-store-link="fashion"{% if section.settings.store_links_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}></a>
+    <a href="{{ auto_store_url | default: routes.root_url }}" data-demo-control="store" data-demo-value="auto" data-demo-store-link="auto"{% if section.settings.store_links_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}></a>
+    <button type="button" data-demo-control="device" data-demo-value="desktop"></button>
+    <button type="button" data-demo-control="device" data-demo-value="mobile"></button>
+  </div>
+
+  <template data-demo-store-custom-js="fashion">{{ section.settings.fashion_custom_js | escape }}</template>
+  <template data-demo-store-custom-js="auto">{{ section.settings.auto_custom_js | escape }}</template>
+
+  <div class="gpf-demo-toolbar__actions">
+    {% if show_demo_guide_actions %}
+      <button type="button" data-demo-action="reset" class="gpf-demo-button gpf-demo-button--outline">{{ section.settings.reset_label | default: 'Reset demo' }}</button>
+      <button type="button" data-demo-action="toggle-guide" class="gpf-demo-button gpf-demo-button--dark" aria-controls="gpf-demo-guide" aria-expanded="true">
+        <span data-demo-guide-label>{{ section.settings.hide_guide_label | default: 'Hide guide' }}</span>
+      </button>
+    {% endif %}
+    <a href="{{ section.settings.trial_url | default: 'https://apps.shopify.com/product-filter-and-search' }}"{% if section.settings.trial_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %} class="gpf-demo-button gpf-demo-button--primary">
+      {{ section.settings.trial_label | default: 'Start free trial' }}
+    </a>
+  </div>
+</div>

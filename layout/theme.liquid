@@ -1,0 +1,425 @@
+<!doctype html>
+<html
+  {% if request.design_mode %}
+    class="shopify-design-mode"
+  {% endif %}
+  lang="{{ request.locale.iso_code }}"
+  style="background:#000"
+>
+  <head> 
+    <script>
+      (() => {
+        const isMobileViewport = window.matchMedia('(max-width: 1179px)').matches;
+        const defaultGuideOpen = !isMobileViewport;
+        const fallbackState = {
+          store: 'fashion',
+          device: isMobileViewport ? 'mobile' : 'desktop',
+          desktopLayout: 'sidebar',
+          guideOpen: defaultGuideOpen,
+          doneSteps: [],
+        };
+        document.documentElement.dataset.demoLoading = 'true';
+
+        const finishStorefrontLoading = () => {
+          requestAnimationFrame(() => {
+            document.documentElement.dataset.demoLoading = 'complete';
+          });
+        };
+
+        const loadingTimeout = window.setTimeout(finishStorefrontLoading, 8000);
+        window.addEventListener('load', () => {
+          window.clearTimeout(loadingTimeout);
+          finishStorefrontLoading();
+        }, { once: true });
+        document.addEventListener('globo-demo:storefront-ready', finishStorefrontLoading, { once: true });
+        window.finishGloboDemoLoading = finishStorefrontLoading;
+
+        try {
+          const storedState = JSON.parse(sessionStorage.getItem('globo-demo:session-state') || '{}');
+          const initialState = {
+            store: ['fashion', 'auto'].includes(storedState.store) ? storedState.store : 'fashion',
+            device: isMobileViewport || storedState.device === 'mobile' ? 'mobile' : 'desktop',
+            desktopLayout: ['sidebar', 'horizontal', 'drawer'].includes(storedState.desktopLayout)
+              ? storedState.desktopLayout
+              : 'sidebar',
+            guideOpen: typeof storedState.guideOpen === 'boolean' ? storedState.guideOpen : defaultGuideOpen,
+            doneSteps: Array.isArray(storedState.doneSteps) ? storedState.doneSteps : [],
+          };
+
+          window.__globoDemoInitialState = initialState;
+          window.globoFilterIsMobileDevice = initialState.device === 'mobile';
+          document.documentElement.dataset.demoDevice = initialState.device;
+          document.documentElement.dataset.demoPrepaint = 'true';
+        } catch (error) {
+          window.__globoDemoInitialState = fallbackState;
+          window.globoFilterIsMobileDevice = isMobileViewport;
+          document.documentElement.dataset.demoDevice = fallbackState.device;
+          document.documentElement.dataset.demoPrepaint = 'true';
+        }
+      })();
+    </script>
+    <style id="gpf-demo-critical-style">
+      html[data-demo-loading="true"] body {
+        background: #000;
+      }
+
+      html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::before,
+      html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::after {
+        position: fixed;
+        content: '';
+        pointer-events: none;
+      }
+
+      html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::before {
+        inset: 0;
+        z-index: 2147483000;
+        background: linear-gradient(to bottom, #14171a 0 56px, #000 56px 100%);
+      }
+
+      html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::after {
+        top: 78px;
+        right: 352px;
+        bottom: 22px;
+        left: 22px;
+        z-index: 2147483001;
+        overflow: hidden;
+        background:
+          linear-gradient(90deg, transparent, rgba(255, 255, 255, .72), transparent) -100% 0 / 45% 100% no-repeat,
+          #f1f1ee;
+        border-radius: 16px;
+        animation: demo-critical-loading-shimmer 1.2s ease-in-out infinite;
+      }
+
+      @media screen and (max-width: 1179px) {
+        html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::after {
+          right: 22px;
+        }
+      }
+
+      @media screen and (max-width: 749px) {
+        html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::before,
+        html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::after {
+          display: none;
+        }
+      }
+
+      @keyframes demo-critical-loading-shimmer {
+        to {
+          background-position: 200% 0, 0 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html[data-demo-loading="true"]:not([data-demo-skeleton-ready="true"]) body::after {
+          animation: none;
+        }
+      }
+    </style>
+  
+    {%- if settings.favicon != blank -%}
+      <link
+        rel="icon"
+        type="image/png"
+        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+      >
+    {%- endif -%}
+
+    {% comment %}
+      Opt into cross-document (MPA) view transitions and hold first paint until #MainContent
+      parses, so the transition runs consistently.
+      Both are gated on the same settings as the view-transitions.js opt-out switch (see snippets/scripts.liquid).
+    {% endcomment %}
+    {% if settings.transition_to_main_product or settings.page_transition_enabled %}
+      {% style %}
+        @media (prefers-reduced-motion: no-preference) {
+          @view-transition {
+            navigation: auto;
+          }
+        }
+      {% endstyle %}
+      <link
+        rel="expect"
+        href="#MainContent"
+        blocking="render"
+        id="view-transition-render-blocker"
+      >
+    {% endif %}
+
+    {%- render 'meta-tags' -%}
+    {%- render 'stylesheets' -%}
+    {%- render 'fonts' -%}
+    {%- render 'scripts' -%}
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-palette' -%}
+
+    {% if request.design_mode %}
+      {%- render 'theme-editor' -%}
+    {% endif %}
+    {{ 'globo-custom.css' | asset_url | stylesheet_tag }}
+    {{ 'globo-custom-card_product.css' | asset_url | stylesheet_tag }}
+    {{ 'globo-custom-tree.css' | asset_url | stylesheet_tag }}
+    {{ 'globo-custom-search.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'globo-demo.js' | asset_url }}" type="module" fetchpriority="low"></script>
+    {{ content_for_header }}
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
+  </head>
+
+  <body cur="{{ localization.country.currency.iso_code }}" class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+
+    {% render 'chat-drawer' %}
+
+   <div id="gpf-demo" class="gpf-demo">
+    {% section 'demo-toolbar' %}
+    <script>
+      (() => {
+        const root = document.getElementById('gpf-demo');
+        const toolbar = root?.querySelector('[data-demo-toolbar]');
+        const initialState = window.__globoDemoInitialState || {};
+        let store = ['fashion', 'auto'].includes(initialState.store)
+          ? initialState.store
+          : (toolbar?.dataset.defaultStore || 'fashion');
+        const device = initialState.device === 'mobile' ? 'mobile' : 'desktop';
+        const searchLayouts = ['overlay', 'two-column', 'one-column'];
+        const searchLayout = searchLayouts.includes(initialState.searchLayout)
+          ? initialState.searchLayout
+          : (toolbar?.dataset.defaultSearchLayout || 'overlay');
+        const guideOpen = initialState.guideOpen !== false;
+
+        if (!root || !toolbar) return;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.hash = '';
+        const allLayoutLinks = Array.from(toolbar.querySelectorAll('[data-demo-layout-link]'));
+        for (const link of allLayoutLinks) {
+          for (const candidateStore of ['fashion', 'auto']) {
+            const href = candidateStore === 'auto' ? link.dataset.autoHref : link.dataset.fashionHref;
+            if (!href) continue;
+            const candidateUrl = new URL(href, window.location.href);
+            candidateUrl.hash = '';
+            if (candidateUrl.href === currentUrl.href) {
+              store = candidateStore;
+              toolbar.dataset.activeLayout = link.dataset.demoLayoutLink;
+            }
+          }
+        }
+        root.dataset.demoDevice = device;
+        root.dataset.demoSearchLayout = device === 'mobile' ? 'overlay' : searchLayout;
+        root.dataset.demoGuide = guideOpen ? 'open' : 'closed';
+
+        const setToolbarSelect = (control, value) => {
+          const select = toolbar.querySelector(`select[data-demo-select="${control}"]`);
+          if (select) select.value = value;
+        };
+        setToolbarSelect('store', store);
+        setToolbarSelect('device', device);
+        setToolbarSelect('search-layout', searchLayout);
+
+        ['store', 'device'].forEach((control) => {
+          const activeValue = control === 'store' ? store : device;
+          toolbar.querySelectorAll(`[data-demo-control="${control}"]`).forEach((controlElement) => {
+            const isActive = controlElement.dataset.demoValue === activeValue;
+            controlElement.classList.toggle('gpf-demo-segmented-control__button--active', isActive);
+            if (controlElement instanceof HTMLAnchorElement) {
+              if (isActive) controlElement.setAttribute('aria-current', 'page');
+              else controlElement.removeAttribute('aria-current');
+            } else {
+              controlElement.setAttribute('aria-pressed', String(isActive));
+            }
+          });
+        });
+
+        const hrefDatasetKey = store === 'auto' ? 'autoHref' : 'fashionHref';
+        const layoutLinks = allLayoutLinks;
+        layoutLinks.forEach((link) => {
+          const href = link.dataset[hrefDatasetKey];
+          if (href) link.href = href;
+        });
+
+        const activeLayout = toolbar.dataset.activeLayout || 'sidebar';
+        setToolbarSelect('layout', activeLayout);
+        const activeLayoutLink = layoutLinks.find((link) => link.dataset.demoLayoutLink === activeLayout);
+        layoutLinks.forEach((link) => {
+          const isActive = link === activeLayoutLink;
+          link.classList.toggle('gpf-demo-segmented-control__button--active', isActive);
+          if (isActive) link.setAttribute('aria-current', 'page');
+          else link.removeAttribute('aria-current');
+        });
+        toolbar.querySelectorAll('[data-demo-store-link]').forEach((link) => {
+          const href = link.dataset.demoStoreLink === 'auto'
+            ? activeLayoutLink?.dataset.autoHref
+            : activeLayoutLink?.dataset.fashionHref;
+          if (href) link.href = href;
+        });
+
+        const guideToggle = toolbar.querySelector('[data-demo-action="toggle-guide"]');
+        const guideLabel = toolbar.querySelector('[data-demo-guide-label]');
+        guideToggle?.setAttribute('aria-expanded', String(guideOpen));
+        if (guideLabel) {
+          guideLabel.textContent = guideOpen
+            ? (toolbar.dataset.guideLabelOpen || 'Hide guide')
+            : (toolbar.dataset.guideLabelClosed || 'Show guide');
+        }
+      })();
+    </script>
+    <div class="gpf-demo__body">
+      {% sections 'demo-guide-group' %}
+      <script>
+        (() => {
+          const root = document.getElementById('gpf-demo');
+          const guide = document.getElementById('gpf-demo-guide');
+          const cards = Array.from(guide?.querySelectorAll('.gpf-demo-step[data-demo-step]') || []);
+          const storedSteps = window.__globoDemoInitialState?.doneSteps;
+          const doneSteps = new Set(Array.isArray(storedSteps) ? storedSteps : []);
+          let completed = 0;
+
+          cards.forEach((card) => {
+            const isDone = doneSteps.has(card.dataset.demoStep);
+            if (isDone) completed += 1;
+
+            card.classList.toggle('gpf-demo-step--checked', isDone);
+            card.toggleAttribute('data-demo-done', isDone);
+            card.setAttribute('aria-pressed', String(isDone));
+
+            const icon = card.querySelector('.gpf-demo-step__icon .sc-interp');
+            if (icon) icon.textContent = isDone ? '✓' : '';
+          });
+
+          const total = cards.length;
+          const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+          const progress = guide?.querySelector('[data-demo-progress]');
+          const fill = progress?.querySelector('.gpf-demo-progress__fill');
+          const text = guide?.querySelector('.gpf-demo-progress__text');
+          const pillCount = root?.querySelector('[data-demo-guide-pill-count]');
+
+          progress?.setAttribute('aria-valuemax', String(total));
+          progress?.setAttribute('aria-valuenow', String(completed));
+          if (fill) fill.style.width = `${percent}%`;
+          if (text) text.textContent = `${completed} / ${total}`;
+          if (pillCount) pillCount.textContent = `${completed}/${total}`;
+        })();
+      </script>
+      <div class="gpf-demo__viewport">
+        <div class="gpf-demo__storefront page-wrapper ">
+          <script>
+            document.currentScript.parentElement.setAttribute(
+              'mode',
+              window.__globoDemoInitialState?.device === 'mobile' ? 'mobile' : 'desktop'
+            );
+          </script>
+          {% render 'demo-storefront-skeleton' %}
+          <script>
+            document.documentElement.dataset.demoSkeletonReady = 'true';
+          </script>
+        
+              <div id="header-group">
+                {% sections 'header-group' %}
+              </div>
+
+              <script>
+                // Inline header height and menu style calculations to prevent layout shift
+                // Note: Updates in calculateHeaderGroupHeight(), updateTransparentHeaderOffset() and setHeaderMenuStyle() utilities.js should be kept in sync with this function
+                (function setHeaderHeighCustomProperties() {
+                  /*
+                  * Header calculation functions for maintaining CSS variables
+                  * Mimic calculateHeaderGroupHeight() in utilities.js
+                  */
+                  const header = document.querySelector('header-component, [data-demo-store-header]');
+                  const headerGroup = document.querySelector('#header-group');
+                  const hasHeaderSection = headerGroup?.querySelector('.header-section');
+
+                  if (!header || !headerGroup) return;
+
+                  const headerTopRow = header.querySelector('.header__row--top');
+                  const headerHeight = header.offsetHeight;
+
+                  // Calculate the total height of the header group
+                  let headerGroupHeight = 0;
+                  const children = headerGroup.children;
+                  for (let i = 0; i < children.length; i++) {
+                    const element = children[i];
+                    if (element === header || !(element instanceof HTMLElement)) continue;
+                    headerGroupHeight += element.offsetHeight;
+                  }
+
+                  // Check for transparent header special case
+                  if (header.hasAttribute('transparent') && header.parentElement?.nextElementSibling) {
+                    headerGroupHeight += headerHeight;
+                  }
+
+                  // Set CSS variables
+                  document.body.style.setProperty('--header-height', `${headerHeight}px`);
+                  document.body.style.setProperty('--header-group-height', `${headerGroupHeight}px`);
+
+                  if (headerTopRow) {
+                    window.requestAnimationFrame(function () {
+                      document.body.style.setProperty('--top-row-height', `${headerTopRow.offsetHeight}px`);
+                    });
+                  }
+
+                  /**
+                  * Updates CSS custom properties for transparent header offset calculation
+                  * Mimic updateTransparentHeaderOffset() in utilities.js
+                  */
+
+                  if (!hasHeaderSection || !header?.hasAttribute('transparent')) {
+                    document.body.style.setProperty('--transparent-header-offset-boolean', '0');
+                    return;
+                  }
+
+                  const hasImmediateSection = hasHeaderSection.nextElementSibling?.classList.contains('shopify-section');
+
+                  const shouldApplyOffset = !hasImmediateSection ? '1' : '0';
+                  document.body.style.setProperty('--transparent-header-offset-boolean', shouldApplyOffset);
+                })();
+
+                (function setHeaderMenuStyle() {
+                  const headerComponent = document.querySelector('#header-component');
+                  if (headerComponent) {
+                    const isTouchDevice = 'ontouchstart' in window && navigator.maxTouchPoints > 0;
+                    const overflowList = headerComponent?.querySelector('overflow-list');
+                    const hasReachedMinimum = overflowList && overflowList.hasAttribute('minimum-reached');
+                    headerComponent.dataset.menuStyle = isTouchDevice || hasReachedMinimum ? 'drawer' : 'menu';
+                  }
+                })();
+              </script>
+              <div class="gl-search-backdrop gl-backdrop gl-close-layer"></div>
+              <main
+                id="MainContent"
+                class="content-for-layout"
+                role="main"
+                data-page-transition-enabled="{{ settings.page_transition_enabled }}"
+                data-product-transition="{{ settings.transition_to_main_product }}"
+                data-template="{{ template }}"
+              >
+                {{ content_for_layout }}
+
+                {% render 'cart-drawer', render_wrapper: true %}
+                {% render 'theme-drawer' %}
+
+                {% render 'search-modal' %}
+
+                {% if settings.quick_add or settings.mobile_quick_add %}
+                  {% render 'quick-add-modal' %}
+                {% endif %}
+              </main>
+
+            
+            
+        </div>
+      </div>
+     </div>
+    </div>
+
+    {%- capture YMMTemplate -%}{% render 'globo.filter.form' %}{%- endcapture -%}{%- unless YMMTemplate contains 'Liquid error' -%}<script id="gspfForm" type="template/html">{{- YMMTemplate | replace: "script>", "scripttag>" -}}</script>{%- endunless -%}
+    {%- capture productTemplate -%}{% render 'globo.filter.product', themeTranslation: shop.metafields.globoFilter.themeTranslation.value[request.locale.iso_code] %}{%- endcapture -%}{%- unless productTemplate contains 'Liquid error' -%}<script id="gspfProduct" type="template/html">{{- productTemplate | replace: "script>", "scripttag>" -}}</script>{%- endunless -%}
+    
+    {% if request.page_type == 'search' %}
+    <script id="gspfResultsTitleTemplate" type="template/html">{% raw %}Search: {{ paginate.total }} {% if paginate.total > 1 %}results{% else %}result{% endif %} found for "{% endraw %}{{ search.terms }}{% raw %}" — {% endraw %}{{ shop.name }}{% raw %}{% endraw %}</script>
+    {% endif %}   
+    <script>window.autocompleteFormSelector = ".demo-store-header__search>form.demo-store-header__search-button";</script>
+ 
+    </body>
+    <footer>
+      {% sections 'footer-group' %}
+    </footer>
+</html>

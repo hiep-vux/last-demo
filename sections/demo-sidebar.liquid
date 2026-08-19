@@ -1,0 +1,348 @@
+{% if request.page_type == 'collection' or request.page_type == 'search' %}
+  {% render 'demo-sidebar', section: section %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Demo guide",
+  "tag": "section",
+  "class": "gpf-demo-guide-section",
+  "enabled_on": {
+    "groups": ["aside"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Guide"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Try it yourself"
+    },
+    {
+      "type": "text",
+      "id": "pill_label",
+      "label": "Collapsed label",
+      "default": "Try it yourself"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Each step runs on the storefront to your left. Tap one and watch what the app does.</p>"
+    },
+    {
+      "type": "text",
+      "id": "close_label",
+      "label": "Close button label",
+      "default": "Close guide"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress",
+      "label": "Show progress",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "progress_label",
+      "label": "Progress accessibility label",
+      "default": "Guide progress"
+    },
+    {
+      "type": "header",
+      "content": "Footer call to action"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_footer",
+      "label": "Show footer call to action",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "footer_text",
+      "label": "Text",
+      "default": "<p>Everything here is served by the app on a stock Horizon theme. No theme code edits.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Install on my store"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL",
+      "info": "The Globo app listing is used when no URL is selected."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "Open button in a new tab",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Group heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Feature group"
+        }
+      ]
+    },
+    {
+      "type": "step",
+      "name": "Guide card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "step_id",
+          "label": "Step ID",
+          "info": "Use a unique value. It is used to save progress."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Guide step"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "badge_label",
+          "label": "Badge label",
+          "info": "Leave blank to hide the badge. For example: Most used or New."
+        },
+        {
+          "type": "select",
+          "id": "badge_style",
+          "label": "Badge style",
+          "options": [
+            {
+              "value": "most-used",
+              "label": "Most used"
+            },
+            {
+              "value": "new",
+              "label": "New"
+            },
+            {
+              "value": "neutral",
+              "label": "Neutral"
+            }
+          ],
+          "default": "neutral"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_clear_all_filter",
+          "label": "Use clearAllFilter()",
+          "info": "Clear previously selected filters before running the card's custom onclick attribute.",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_attribute",
+          "label": "Use custom attribute",
+          "info": "Enable store-specific custom attributes such as onclick.",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "remove_custom_attribute_when_checked",
+          "label": "Remove custom attribute when checked",
+          "info": "Remove the active custom attribute after this Guide card becomes checked. It is restored when the card is unchecked.",
+          "default": false,
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "header",
+          "content": "Collection toggle"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_collection_toggle",
+          "label": "Use collection toggle",
+          "info": "Navigate between a normal collection and its variants-as-products collection.",
+          "default": false
+        },
+        {
+          "type": "collection",
+          "id": "toggle_active_collection",
+          "label": "Collection when checked",
+          "info": "Clicking the unchecked Guide card navigates to this collection."
+        },
+        {
+          "type": "collection",
+          "id": "toggle_inactive_collection",
+          "label": "Collection when unchecked",
+          "info": "Clicking the checked Guide card navigates back to this collection."
+        },
+        {
+          "type": "header",
+          "content": "Guided focus"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_guided_focus",
+          "label": "Use guided focus",
+          "info": "Scroll to and highlight the affected storefront option before running the custom action.",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "fashion_focus_selector",
+          "label": "Fashion target selector",
+          "info": "CSS selector for the area or option to highlight. Leave blank to detect the first toggleCheckboxFilter value.",
+          "visible_if": "{{ block.settings.use_guided_focus == true }}"
+        },
+        {
+          "type": "text",
+          "id": "auto_focus_selector",
+          "label": "Auto parts target selector",
+          "info": "CSS selector for the area or option to highlight. Leave blank to detect the first toggleCheckboxFilter value.",
+          "visible_if": "{{ block.settings.use_guided_focus == true }}"
+        },
+        {
+          "type": "select",
+          "id": "focus_scroll_position",
+          "label": "Scroll position",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "start",
+              "label": "Top"
+            }
+          ],
+          "default": "center",
+          "visible_if": "{{ block.settings.use_guided_focus == true }}"
+        },
+        {
+          "type": "range",
+          "id": "focus_before_delay",
+          "label": "Delay before action",
+          "min": 0,
+          "max": 1200,
+          "step": 100,
+          "unit": "ms",
+          "default": 500,
+          "visible_if": "{{ block.settings.use_guided_focus == true }}"
+        },
+        {
+          "type": "range",
+          "id": "focus_highlight_duration",
+          "label": "Result highlight duration",
+          "min": 500,
+          "max": 3000,
+          "step": 100,
+          "unit": "ms",
+          "default": 1400,
+          "visible_if": "{{ block.settings.use_guided_focus == true }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "focus_scroll_back",
+          "label": "Scroll back after action",
+          "default": false,
+          "visible_if": "{{ block.settings.use_guided_focus == true }}"
+        },
+        {
+          "type": "select",
+          "id": "focus_scroll_back_destination",
+          "label": "Scroll back destination",
+          "options": [
+            {
+              "value": "original",
+              "label": "Original position"
+            },
+            {
+              "value": "top",
+              "label": "Top of page"
+            }
+          ],
+          "default": "original",
+          "visible_if": "{{ block.settings.use_guided_focus == true and block.settings.focus_scroll_back == true }}"
+        },
+        {
+          "type": "header",
+          "content": "Fashion custom attribute",
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "text",
+          "id": "fashion_attribute_name",
+          "label": "Attribute name",
+          "info": "Any valid HTML attribute, for example onclick. Internal data-demo-* attributes are reserved.",
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "text",
+          "id": "fashion_attribute_value",
+          "label": "Attribute value",
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "header",
+          "content": "Auto parts custom attribute",
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "text",
+          "id": "auto_attribute_name",
+          "label": "Attribute name",
+          "info": "Any valid HTML attribute, for example onclick. Internal data-demo-* attributes are reserved.",
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "text",
+          "id": "auto_attribute_value",
+          "label": "Attribute value",
+          "visible_if": "{{ block.settings.use_custom_attribute == true }}"
+        },
+        {
+          "type": "select",
+          "id": "store",
+          "label": "Show for store",
+          "options": [
+            {
+              "value": "all",
+              "label": "All stores"
+            },
+            {
+              "value": "fashion",
+              "label": "Fashion"
+            },
+            {
+              "value": "auto",
+              "label": "Auto parts"
+            }
+          ],
+          "default": "all"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 40,
+  "presets": [
+    {
+      "name": "Demo guide"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,79 @@
+{% liquid
+  assign skeleton_source_title = collection.title | default: page_title | downcase
+  assign skeleton_layout = 'sidebar'
+  if skeleton_source_title contains '#horizontal'
+    assign skeleton_layout = 'horizontal'
+  elsif skeleton_source_title contains '#drawer'
+    assign skeleton_layout = 'drawer'
+  endif
+%}
+
+<div
+  class="demo-storefront-skeleton demo-storefront-skeleton--{{ skeleton_layout }}"
+  data-demo-storefront-skeleton
+  data-skeleton-layout="{{ skeleton_layout }}"
+  aria-hidden="true"
+>
+  <span class="visually-hidden" role="status">Loading storefront</span>
+
+  <div class="demo-storefront-skeleton__header">
+    <span class="demo-skeleton-shape demo-storefront-skeleton__logo"></span>
+    <div class="demo-storefront-skeleton__nav">
+      <span class="demo-skeleton-shape"></span>
+      <span class="demo-skeleton-shape"></span>
+      <span class="demo-skeleton-shape"></span>
+      <span class="demo-skeleton-shape"></span>
+    </div>
+    <span class="demo-skeleton-shape demo-storefront-skeleton__search"></span>
+    <span class="demo-skeleton-shape demo-storefront-skeleton__icon"></span>
+  </div>
+
+  <div class="demo-storefront-skeleton__body">
+    <div class="demo-storefront-skeleton__heading">
+      <span class="demo-skeleton-shape demo-storefront-skeleton__eyebrow"></span>
+      <span class="demo-skeleton-shape demo-storefront-skeleton__title"></span>
+      <span class="demo-skeleton-shape demo-storefront-skeleton__subtitle"></span>
+    </div>
+
+    <div class="demo-storefront-skeleton__controls demo-storefront-skeleton__controls--sidebar">
+      <span class="demo-skeleton-shape"></span>
+      <span class="demo-skeleton-shape"></span>
+      <span class="demo-skeleton-shape"></span>
+    </div>
+
+    <div class="demo-storefront-skeleton__controls demo-storefront-skeleton__controls--horizontal">
+      {%- for index in (1..7) -%}
+        <span class="demo-skeleton-shape"></span>
+      {%- endfor -%}
+    </div>
+
+    <div class="demo-storefront-skeleton__controls demo-storefront-skeleton__controls--drawer">
+      <span class="demo-skeleton-shape demo-storefront-skeleton__result-count"></span>
+      <span class="demo-skeleton-shape demo-storefront-skeleton__drawer-button"></span>
+      <span class="demo-skeleton-shape demo-storefront-skeleton__sort-button"></span>
+    </div>
+
+    <div class="demo-storefront-skeleton__results">
+      <div class="demo-storefront-skeleton__filters">
+        {%- for index in (1..6) -%}
+          <div class="demo-storefront-skeleton__filter">
+            <span class="demo-skeleton-shape"></span>
+            <span class="demo-skeleton-shape"></span>
+            <span class="demo-skeleton-shape"></span>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <div class="demo-storefront-skeleton__grid">
+        {%- for index in (1..6) -%}
+          <div class="demo-storefront-skeleton__card">
+            <span class="demo-skeleton-shape demo-storefront-skeleton__image"></span>
+            <span class="demo-skeleton-shape demo-storefront-skeleton__card-title"></span>
+            <span class="demo-skeleton-shape demo-storefront-skeleton__card-meta"></span>
+            <span class="demo-skeleton-shape demo-storefront-skeleton__price"></span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,155 @@
+{%- liquid
+  assign guide_title = section.settings.title | default: 'Try it yourself'
+  assign pill_label = section.settings.pill_label | default: guide_title
+  assign install_url = section.settings.button_url
+
+  if install_url == blank
+    assign install_url = 'https://apps.shopify.com/product-filter-and-search'
+  endif
+-%}
+
+<button
+  type="button"
+  class="gpf-demo-guide__trigger"
+  data-demo-guide-pill
+  data-demo-action="open-guide"
+  aria-controls="gpf-demo-guide"
+  aria-expanded="false"
+>
+  <span class="gpf-demo-guide__trigger-dot" aria-hidden="true"></span>
+  <span>{{ pill_label | escape }} · <span data-demo-guide-pill-count>0/0</span></span>
+</button>
+
+<div
+  class="gpf-demo-guide__backdrop"
+  data-demo-guide-scrim
+  data-demo-action="close-guide"
+  aria-hidden="true"
+></div>
+
+<aside id="gpf-demo-guide" class="gpf-demo-guide" aria-label="{{ guide_title | escape }}">
+  <div class="gpf-demo-guide__header">
+    <h2 class="gpf-demo-guide__title">{{ guide_title | escape }}</h2>
+    <button
+      type="button"
+      class="gpf-demo-guide__close"
+      data-demo-action="close-guide"
+      aria-label="{{ section.settings.close_label | default: 'Close guide' | escape }}"
+    >
+      &times;
+    </button>
+  </div>
+
+  {%- if section.settings.description != blank -%}
+    <div class="gpf-demo-guide__description rte">{{ section.settings.description }}</div>
+  {%- endif -%}
+
+  {%- if section.settings.show_progress -%}
+    <div class="gpf-demo-progress">
+      <div
+        class="gpf-demo-progress__bar"
+        data-demo-progress
+        role="progressbar"
+        aria-label="{{ section.settings.progress_label | default: 'Guide progress' | escape }}"
+        aria-valuemin="0"
+        aria-valuemax="0"
+        aria-valuenow="0"
+      >
+        <div class="gpf-demo-progress__fill"></div>
+      </div>
+      <span class="gpf-demo-progress__text">0 / 0</span>
+    </div>
+  {%- endif -%}
+
+  <div class="gpf-demo-guide__steps">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'heading' -%}
+          {%- if block.settings.title != blank -%}
+            <h3 class="gpf-demo-guide__section-title gpf-demo-guide__section-title--block" {{ block.shopify_attributes }}>
+              {{ block.settings.title | escape }}
+            </h3>
+          {%- endif -%}
+
+        {%- when 'step' -%}
+          {%- liquid
+            assign step_id = block.settings.step_id | strip | handleize
+            if step_id == blank
+              assign step_id = block.id
+            endif
+          -%}
+          <button
+            type="button"
+            class="gpf-demo-step"
+            data-demo-step="{{ step_id | escape }}"
+            {% if block.settings.store != 'all' %}data-demo-store-only="{{ block.settings.store }}"{% endif %}
+            aria-pressed="false"
+            {{ block.shopify_attributes }}
+          >
+            <span class="gpf-demo-step__icon" aria-hidden="true"><span class="sc-interp"></span></span>
+            <span class="gpf-demo-step__content">
+              <span class="gpf-demo-step__heading">
+                <span class="gpf-demo-step__title">{{ block.settings.title | escape }}</span>
+                {%- if block.settings.badge_label != blank -%}
+                  <span class="gpf-demo-step__badge gpf-demo-step__badge--{{ block.settings.badge_style | default: 'neutral' }}">
+                    {{ block.settings.badge_label | escape }}
+                  </span>
+                {%- endif -%}
+              </span>
+              {%- if block.settings.description != blank -%}
+                <span class="gpf-demo-step__description">{{ block.settings.description | escape }}</span>
+              {%- endif -%}
+            </span>
+          </button>
+          <script type="application/json" data-demo-guide-step-config="{{ step_id | escape }}">
+            {
+              "useClearAllFilter": {{ block.settings.use_clear_all_filter | json }},
+              "useCustomAttribute": {{ block.settings.use_custom_attribute | json }},
+              "removeCustomAttributeWhenChecked": {{ block.settings.remove_custom_attribute_when_checked | json }},
+              "collectionToggle": {
+                "enabled": {{ block.settings.use_collection_toggle | json }},
+                "activeUrl": {{ block.settings.toggle_active_collection.url | json }},
+                "inactiveUrl": {{ block.settings.toggle_inactive_collection.url | json }}
+              },
+              "guidedFocus": {
+                "enabled": {{ block.settings.use_guided_focus | json }},
+                "fashionSelector": {{ block.settings.fashion_focus_selector | strip | json }},
+                "autoSelector": {{ block.settings.auto_focus_selector | strip | json }},
+                "scrollPosition": {{ block.settings.focus_scroll_position | default: 'center' | json }},
+                "beforeDelay": {{ block.settings.focus_before_delay | default: 500 | json }},
+                "highlightDuration": {{ block.settings.focus_highlight_duration | default: 1400 | json }},
+                "scrollBack": {{ block.settings.focus_scroll_back | json }},
+                "scrollBackDestination": {{ block.settings.focus_scroll_back_destination | default: 'original' | json }}
+              },
+              "fashion": {
+                "name": {{ block.settings.fashion_attribute_name | strip | json }},
+                "value": {{ block.settings.fashion_attribute_value | json }}
+              },
+              "auto": {
+                "name": {{ block.settings.auto_attribute_name | strip | json }},
+                "value": {{ block.settings.auto_attribute_value | json }}
+              }
+            }
+          </script>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+
+  {%- if section.settings.show_footer -%}
+    <div class="gpf-demo-guide__footer">
+      {%- if section.settings.footer_text != blank -%}
+        <div class="gpf-demo-guide__footer-text rte">{{ section.settings.footer_text }}</div>
+      {%- endif -%}
+
+      {%- if section.settings.button_label != blank -%}
+        <a
+          href="{{ install_url }}"
+          class="gpf-demo-guide__footer-button"
+          {% if section.settings.open_new_tab %}target="_blank" rel="noopener"{% endif %}
+        >
+          {{ section.settings.button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</aside>

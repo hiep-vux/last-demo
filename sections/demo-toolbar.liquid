@@ -1,0 +1,264 @@
+{% render 'demo-toolbar', section: section %}
+
+{% schema %}
+{
+  "name": "Demo toolbar",
+  "tag": "section",
+  "class": "gpf-demo-toolbar-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Brand"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Name",
+      "default": "Smart Product Filter & Search"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge",
+      "default": "Horizon theme"
+    },
+    {
+      "type": "header",
+      "content": "Filter layout links"
+    },
+    {
+      "type": "text",
+      "id": "layout_label",
+      "label": "Group label",
+      "default": "Filter"
+    },
+    {
+      "type": "select",
+      "id": "active_layout",
+      "label": "Active link",
+      "options": [
+        { "value": "sidebar", "label": "Sidebar" },
+        { "value": "horizontal", "label": "Horizontal" },
+        { "value": "drawer", "label": "Drawer" }
+      ],
+      "default": "sidebar"
+    },
+    {
+      "type": "text",
+      "id": "sidebar_label",
+      "label": "Sidebar label",
+      "default": "Sidebar"
+    },
+    {
+      "type": "url",
+      "id": "fashion_sidebar_url",
+      "label": "Sidebar URL — Fashion"
+    },
+    {
+      "type": "url",
+      "id": "auto_sidebar_url",
+      "label": "Sidebar URL — Auto parts"
+    },
+    {
+      "type": "text",
+      "id": "horizontal_label",
+      "label": "Horizontal label",
+      "default": "Horizontal"
+    },
+    {
+      "type": "url",
+      "id": "fashion_horizontal_url",
+      "label": "Horizontal URL — Fashion"
+    },
+    {
+      "type": "url",
+      "id": "auto_horizontal_url",
+      "label": "Horizontal URL — Auto parts"
+    },
+    {
+      "type": "text",
+      "id": "drawer_label",
+      "label": "Drawer label",
+      "default": "Drawer"
+    },
+    {
+      "type": "url",
+      "id": "fashion_drawer_url",
+      "label": "Drawer URL — Fashion"
+    },
+    {
+      "type": "url",
+      "id": "auto_drawer_url",
+      "label": "Drawer URL — Auto parts"
+    },
+    {
+      "type": "checkbox",
+      "id": "layout_links_new_tab",
+      "label": "Open layout links in a new tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Search layout"
+    },
+    {
+      "type": "text",
+      "id": "search_layout_label",
+      "label": "Group label",
+      "default": "Search"
+    },
+    {
+      "type": "select",
+      "id": "default_search_layout",
+      "label": "Default search layout",
+      "options": [
+        { "value": "overlay", "label": "Full-width overlay" },
+        { "value": "two-column", "label": "Two column" },
+        { "value": "one-column", "label": "One column" }
+      ],
+      "default": "overlay"
+    },
+    {
+      "type": "text",
+      "id": "search_overlay_label",
+      "label": "Overlay label",
+      "default": "Full-width overlay"
+    },
+    {
+      "type": "text",
+      "id": "search_two_column_label",
+      "label": "Two-column label",
+      "default": "Two column"
+    },
+    {
+      "type": "text",
+      "id": "search_one_column_label",
+      "label": "One-column label",
+      "default": "One column"
+    },
+    {
+      "type": "header",
+      "content": "Store links"
+    },
+    {
+      "type": "text",
+      "id": "store_label",
+      "label": "Group label",
+      "default": "Store"
+    },
+    {
+      "type": "select",
+      "id": "default_store",
+      "label": "Default active store",
+      "options": [
+        { "value": "fashion", "label": "Fashion" },
+        { "value": "auto", "label": "Auto parts" }
+      ],
+      "default": "fashion"
+    },
+    {
+      "type": "text",
+      "id": "fashion_label",
+      "label": "Fashion label",
+      "default": "Fashion"
+    },
+    {
+      "type": "text",
+      "id": "auto_label",
+      "label": "Auto parts label",
+      "default": "Auto parts"
+    },
+    {
+      "type": "checkbox",
+      "id": "store_links_new_tab",
+      "label": "Open store links in a new tab",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "fashion_custom_js",
+      "label": "Fashion custom JavaScript",
+      "info": "Runs once when Fashion is the active store. Available variables: store, root, toolbar and window.globoDemoControls. Do not include script tags."
+    },
+    {
+      "type": "textarea",
+      "id": "auto_custom_js",
+      "label": "Auto parts custom JavaScript",
+      "info": "Runs once when Auto parts is the active store. Available variables: store, root, toolbar and window.globoDemoControls. Do not include script tags."
+    },
+    {
+      "type": "header",
+      "content": "Device controls"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_mode",
+      "label": "Show View mode",
+      "info": "Hide the View dropdown in the top bar. Guide cards can still switch between Desktop and Mobile.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "device_label",
+      "label": "Group label",
+      "default": "View"
+    },
+    {
+      "type": "text",
+      "id": "desktop_label",
+      "label": "Desktop label",
+      "default": "Desktop"
+    },
+    {
+      "type": "text",
+      "id": "mobile_label",
+      "label": "Mobile label",
+      "default": "Mobile"
+    },
+    {
+      "type": "header",
+      "content": "Actions"
+    },
+    {
+      "type": "text",
+      "id": "reset_label",
+      "label": "Reset label",
+      "default": "Reset demo"
+    },
+    {
+      "type": "text",
+      "id": "hide_guide_label",
+      "label": "Hide guide label",
+      "default": "Hide guide"
+    },
+    {
+      "type": "text",
+      "id": "show_guide_label",
+      "label": "Show guide label",
+      "default": "Show guide"
+    },
+    {
+      "type": "text",
+      "id": "trial_label",
+      "label": "Trial button label",
+      "default": "Start free trial"
+    },
+    {
+      "type": "url",
+      "id": "trial_url",
+      "label": "Trial button URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "trial_new_tab",
+      "label": "Open trial link in a new tab",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

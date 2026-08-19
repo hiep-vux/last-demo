@@ -1,0 +1,842 @@
+{%- liquid
+  assign fashion_menu = section.settings.menu
+  assign auto_menu = section.settings.auto_menu | default: fashion_menu
+  assign fashion_logo = section.settings.logo | default: settings.logo
+  assign auto_logo = section.settings.auto_logo
+  assign logo_width = section.settings.logo_width
+  assign logo_width_2x = logo_width | times: 2
+  assign show_country_selector = false
+
+  if section.settings.show_country_selector and localization.available_countries.size > 1
+    assign show_country_selector = true
+  endif
+-%}
+
+<header
+  class="demo-store-header{% if section.settings.sticky_header %} demo-store-header--sticky{% endif %}"
+  data-demo-store-header
+  style="
+    --demo-header-background: {{ section.settings.background_color }};
+    --demo-header-text: {{ section.settings.text_color }};
+    --demo-header-muted: {{ section.settings.muted_color }};
+    --demo-header-border: {{ section.settings.border_color }};
+    --demo-header-page-width: {{ section.settings.page_width }}px;
+  "
+  {{ section.shopify_attributes }}
+>
+  <div class="demo-store-header__inner">
+    {% render 'demo-header-brand-nav',
+      store: 'fashion',
+      logo: fashion_logo,
+      logo_text: section.settings.logo_text,
+      menu: fashion_menu,
+      logo_width: logo_width,
+      logo_width_2x: logo_width_2x,
+      fallback_name: shop.name
+    %}
+    {% render 'demo-header-brand-nav',
+      store: 'auto',
+      logo: auto_logo,
+      logo_text: section.settings.auto_logo_text,
+      menu: auto_menu,
+      logo_width: logo_width,
+      logo_width_2x: logo_width_2x,
+      fallback_name: 'AUTO PARTS STORE',
+      hidden: true
+    %}
+
+    <div class="demo-store-header__actions">
+      {%- if section.settings.show_search -%}
+        <div class="demo-store-header__search demo-store-header__search--desktop">
+          <form
+            action="{{ routes.search_url }}"
+            method="get"
+            role="search"
+            class="demo-store-header__search-button"
+          >
+            <label class="visually-hidden" for="DemoHeaderSearchDesktop-{{ section.id }}">
+              {{- 'content.search_input_label' | t -}}
+            </label>
+            <input
+              id="DemoHeaderSearchDesktop-{{ section.id }}"
+              class="demo-store-header__search-input"
+              type="search"
+              name="q"
+              value="{% if request.page_type == 'search' %}{{ search.terms | escape }}{% endif %}"
+              placeholder="{{ section.settings.search_label | escape }}"
+              autocomplete="off"
+            >
+            <button
+              type="submit"
+              class="demo-store-header__search-submit"
+              aria-label="{{ 'content.search' | t }}"
+            >
+              <span class="demo-store-header__search-icon" aria-hidden="true">
+                {{- 'icon-search.svg' | inline_asset_content -}}
+              </span>
+            </button>
+          </form>
+          <button type="button" class="globo-search-activator visually-hidden" tabindex="-1" aria-hidden="true"></button>
+        </div>
+      {%- endif -%}
+
+      {%- if show_country_selector -%}
+        {%- form 'localization', id: 'DemoHeaderLocalizationForm', class: 'demo-store-header__localization-form' -%}
+          <label class="visually-hidden" for="DemoHeaderCountry-{{ section.id }}">
+            Country/region
+          </label>
+          <select
+            id="DemoHeaderCountry-{{ section.id }}"
+            class="demo-store-header__country-select"
+            name="country_code"
+            data-demo-country-selector
+            aria-label="Country/region"
+          >
+            {%- for country in localization.available_countries -%}
+              <option
+                value="{{ country.iso_code }}"
+                {% if country.iso_code == localization.country.iso_code %}selected{% endif %}
+              >
+               {% comment %} {{ country.name }} {% endcomment %}
+                {{ country.currency.iso_code }}
+              </option>
+            {%- endfor -%}
+          </select>
+        {%- endform -%}
+      {%- endif -%}
+
+      {%- if section.settings.show_account and shop.customer_accounts_enabled -%}
+        <a class="demo-store-header__icon-button" href="{{ routes.account_url }}" aria-label="{{ 'content.account_title' | t }}">
+          <span class="svg-wrapper" aria-hidden="true">{{- 'icon-account.svg' | inline_asset_content -}}</span>
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.show_cart -%}
+        {%- capture cart_content -%}
+          <cart-icon class="demo-store-header__cart-icon" data-testid="cart-icon">
+            <span class="svg-wrapper" aria-hidden="true">{{- 'icon-cart.svg' | inline_asset_content -}}</span>
+            {% render 'cart-bubble', limit: 100 %}
+          </cart-icon>
+        {%- endcapture -%}
+
+        {%- if settings.cart_type == 'drawer' and template.name != 'cart' -%}
+          <button
+            type="button"
+            class="demo-store-header__icon-button button-unstyled"
+            on:click="#cart-drawer/toggle"
+            aria-label="{{ 'accessibility.cart' | t }}"
+            aria-haspopup="dialog"
+            aria-controls="cart-drawer"
+          >
+            {{ cart_content }}
+          </button>
+        {%- else -%}
+          <a class="demo-store-header__icon-button" href="{{ routes.cart_url }}" aria-label="{{ 'accessibility.cart' | t }}">
+            {{ cart_content }}
+          </a>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    <div class="demo-store-header__compact-row">
+      {%- if section.settings.show_search -%}
+        <div class="demo-store-header__search demo-store-header__search--compact">
+          <form
+            action="{{ routes.search_url }}"
+            method="get"
+            role="search"
+            class="demo-store-header__search-button"
+          >
+            <label class="visually-hidden" for="DemoHeaderSearchCompact-{{ section.id }}">
+              {{- 'content.search_input_label' | t -}}
+            </label>
+            <input
+              id="DemoHeaderSearchCompact-{{ section.id }}"
+              class="demo-store-header__search-input"
+              type="search"
+              name="q"
+              value="{% if request.page_type == 'search' %}{{ search.terms | escape }}{% endif %}"
+              placeholder="{{ section.settings.mobile_search_label | escape }}"
+              autocomplete="off"
+            >
+            <button
+              type="submit"
+              class="demo-store-header__search-submit"
+              aria-label="{{ 'content.search' | t }}"
+            >
+              <span class="demo-store-header__search-icon" aria-hidden="true">
+                {{- 'icon-search.svg' | inline_asset_content -}}
+              </span>
+            </button>
+          </form>
+          <button type="button" class="globo-search-activator visually-hidden" tabindex="-1" aria-hidden="true"></button>
+        </div>
+      {%- endif -%}
+
+      {% render 'demo-header-compact-nav', store: 'fashion', menu: fashion_menu %}
+      {% render 'demo-header-compact-nav', store: 'auto', menu: auto_menu, hidden: true %}
+    </div>
+  </div>
+</header>
+
+<script src="{{ 'cart-icon.js' | asset_url }}" type="module" fetchpriority="low"></script>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    const selector = section?.querySelector('[data-demo-country-selector]');
+    if (!selector || selector.dataset.ready === 'true') return;
+
+    selector.dataset.ready = 'true';
+    selector.addEventListener('change', () => selector.form?.submit());
+  })();
+</script>
+
+{% stylesheet %}
+  #header-group:has(.demo-store-header--sticky) {
+    display: contents;
+  }
+
+  .demo-header-section:has(> .demo-store-header--sticky) {
+    position: sticky;
+    top: -1px;
+    z-index: var(--layer-menu-drawer);
+  }
+
+  #gpf-demo .demo-header-section:has(> .demo-store-header--sticky) {
+    top: 55px;
+  }
+.gl-search-open #header-group{
+  z-index: 3;
+}
+  .demo-store-header {
+    position: relative;
+    z-index: 30;
+    display: block;
+    color: var(--demo-header-text);
+    background: var(--demo-header-background);
+    border-bottom: 1px solid var(--demo-header-border);
+  }
+  .gl-search-open .demo-store-header{
+    border-bottom-color: transparent;
+  }
+
+  .demo-store-header__inner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    width: 100%;
+    max-width: var(--demo-header-page-width);
+    min-height: 70px;
+    margin-inline: auto;
+    padding: 14px 28px;
+  }
+
+  .demo-store-header__brand {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .demo-store-header__logo {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 40px;
+  }
+
+  .demo-store-header__name {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .2em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .demo-store-header__nav {
+    display: flex;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .demo-store-header__menu {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .demo-store-header__menu-item {
+    position: relative;
+  }
+
+  .demo-store-header__menu-link,
+  .demo-store-header__compact-link {
+    color: var(--demo-header-muted);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.3;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .18s ease;
+  }
+
+  .demo-store-header__menu-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-block: 8px;
+  }
+
+  .demo-store-header__menu-link:hover,
+  .demo-store-header__menu-link--active,
+  .demo-store-header__compact-link:hover,
+  .demo-store-header__compact-link--active {
+    color: var(--demo-header-text);
+    font-weight: 500;
+  }
+
+  .demo-store-header__caret {
+    display: inline-flex;
+    width: 10px;
+    transition: transform .18s ease;
+  }
+
+  .demo-store-header__menu-item:hover .demo-store-header__caret,
+  .demo-store-header__menu-item:focus-within .demo-store-header__caret {
+    transform: rotate(180deg);
+  }
+
+  .demo-store-header__submenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: -16px;
+    z-index: 5;
+    min-width: 210px;
+    padding: 8px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(6px);
+    background: var(--demo-header-background);
+    border: 1px solid var(--demo-header-border);
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgb(20 20 20 / 12%);
+    transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+  }
+
+  .demo-store-header__menu-item:hover .demo-store-header__submenu,
+  .demo-store-header__menu-item:focus-within .demo-store-header__submenu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .demo-store-header__submenu-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .demo-store-header__submenu-link {
+    display: block;
+    padding: 9px 10px;
+    color: var(--demo-header-muted);
+    font-size: 14.5px;
+    line-height: 1.35;
+    text-decoration: none;
+    border-radius: 8px;
+  }
+
+  .demo-store-header__submenu-link:hover,
+  .demo-store-header__submenu-link--active {
+    color: var(--demo-header-text);
+    background: rgb(20 20 20 / 5%);
+  }
+
+  .demo-store-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin-left: auto;
+  }
+
+  .demo-store-header__search {
+    display: flex;
+    min-width: 0;
+  }
+
+  .demo-store-header__search-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: min(250px, 22vw);
+    min-width: 44px;
+    padding: 10px 16px;
+    overflow: hidden;
+    color: var(--demo-header-muted);
+    font: inherit;
+    font-size: 15.5px;
+    line-height: 1.3;
+    text-align: left;
+    background: var(--demo-header-background);
+    border: 1px solid var(--demo-header-border);
+    border-radius: 999px;
+    cursor: text;
+    transition: color .18s ease, border-color .18s ease;
+  }
+
+  .demo-store-header__search-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    color: var(--demo-header-text);
+    font: inherit;
+    line-height: inherit;
+    background: transparent !important;
+    border: 0;
+    outline: 0;
+    appearance: none;
+  }
+
+  .demo-store-header__search-input::placeholder {
+    color: var(--demo-header-muted);
+    opacity: 1;
+  }
+
+  .demo-store-header__search-input::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+
+  .demo-store-header__search-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .demo-store-header__search-button:hover,
+  .demo-store-header__search-button:focus-within {
+    color: var(--demo-header-text);
+    border-color: var(--demo-header-text);
+  }
+
+  .demo-store-header__search-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 20px;
+  }
+
+  .demo-store-header__search-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .demo-store-header__localization-form {
+    display: flex;
+  }
+
+  .demo-store-header__country-select {
+    max-width: 124px;
+    padding: 9px 20px 9px 10px;
+    color: var(--demo-header-text);
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    background-color: var(--demo-header-background);
+    border: 1px solid var(--demo-header-border);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .demo-store-header__icon-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: var(--demo-header-text);
+    background: transparent;
+    border: 0;
+    /* border-radius: 50%; */
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .18s ease;
+  }
+
+  .demo-store-header__icon-button:hover {
+    background: rgb(20 20 20 / 5%);
+  }
+
+  .demo-store-header__icon-button .svg-wrapper {
+    width: 18px;
+  }
+
+  .demo-store-header__cart-icon {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .demo-store-header__cart-icon .cart-bubble {
+    position: absolute;
+    top: -8px;
+    right: -9px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .demo-store-header__compact-row {
+    display: none;
+    width: 100%;
+  }
+
+  .demo-store-header__search--compact {
+    width: 100%;
+  }
+
+  .demo-store-header__search--compact .demo-store-header__search-button {
+    width: 100%;
+    background: rgb(20 20 20 / 3%);
+  }
+
+  .demo-store-header__compact-nav {
+    display: flex;
+    gap: 18px;
+    width: 100%;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .demo-store-header__compact-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .demo-store-header__compact-link {
+    flex: 0 0 auto;
+    font-size: 15.5px;
+  }
+
+  @media screen and (max-width: 1050px) {
+    .demo-store-header__nav,
+    .demo-store-header__search--desktop {
+      display: none;
+    }
+
+    .demo-store-header__compact-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .demo-store-header__inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px 10px;
+      min-height: 0;
+      padding: 14px 16px 12px;
+    }
+
+    .demo-store-header__brand {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .demo-store-header__logo {
+      max-height: 32px;
+    }
+
+    .demo-store-header__actions {
+      gap: 4px;
+    }
+
+    .demo-store-header__icon-button {
+      width: 36px;
+      height: 36px;
+    }
+
+    .demo-store-header__country-select {
+      width: auto;
+      max-width: 76px;
+      min-height: 36px;
+      padding: 7px 20px 7px 10px;
+      font-size: 13px;
+    }
+
+    .demo-store-header__name {
+      max-width: 100%;
+      overflow: hidden;
+      font-size: clamp(12px, 3.35vw, 14px);
+      letter-spacing: .13em;
+      text-overflow: ellipsis;
+    }
+
+    .demo-store-header__compact-row {
+      grid-column: 1 / -1;
+      gap: 16px;
+      padding-top: 2px;
+    }
+
+    .demo-store-header__search--compact .demo-store-header__search-button {
+      min-height: 42px;
+      padding: 9px 14px;
+      font-size: 14px;
+      background: #f7f7f6;
+    }
+
+    .demo-store-header__compact-nav {
+      gap: 18px;
+      padding: 0 0 2px;
+    }
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__nav,
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__search--desktop {
+    display: none;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__compact-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 10px;
+    min-height: 0;
+    padding: 14px 16px 12px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__brand {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__logo {
+    max-height: 32px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__actions {
+    gap: 4px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__icon-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__country-select {
+    width: auto;
+    max-width: 76px;
+    min-height: 36px;
+    padding: 7px 20px 7px 10px;
+    font-size: 13px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: clamp(12px, 3.35vw, 14px);
+    letter-spacing: .13em;
+    text-overflow: ellipsis;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__compact-row {
+    grid-column: 1 / -1;
+    gap: 16px;
+    padding-top: 2px;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__search--compact .demo-store-header__search-button {
+    min-height: 42px;
+    padding: 9px 14px;
+    font-size: 14px;
+    background: #f7f7f6;
+  }
+
+  .gpf-demo__storefront[mode='mobile'] .demo-store-header__compact-nav {
+    gap: 18px;
+    padding: 0 0 2px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Demo header",
+  "tag": "section",
+  "class": "header-section demo-header-section",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Fashion brand"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Fashion logo image"
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Fashion logo text",
+      "info": "Used when no logo image is selected. Shop name is the fallback."
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Fashion menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "header",
+      "content": "Auto parts brand"
+    },
+    {
+      "type": "image_picker",
+      "id": "auto_logo",
+      "label": "Auto parts logo image"
+    },
+    {
+      "type": "text",
+      "id": "auto_logo_text",
+      "label": "Auto parts logo text",
+      "default": "AUTO PARTS STORE",
+      "info": "Used when no Auto parts logo image is selected."
+    },
+    {
+      "type": "link_list",
+      "id": "auto_menu",
+      "label": "Auto parts menu",
+      "info": "Fashion menu is used when this setting is empty."
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 60,
+      "max": 220,
+      "step": 5,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Header actions"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "search_label",
+      "label": "Search label",
+      "default": "Search"
+    },
+    {
+      "type": "text",
+      "id": "mobile_search_label",
+      "label": "Mobile search label",
+      "default": "Search products"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country_selector",
+      "label": "Show country and currency selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart",
+      "label": "Show cart",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "page_width",
+      "label": "Content width",
+      "min": 900,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1240
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_header",
+      "label": "Sticky header",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#171717"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted text",
+      "default": "#8a8a86"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#ececeb"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Demo header"
+    }
+  ]
+}
+{% endschema %}
