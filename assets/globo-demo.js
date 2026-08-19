@@ -206,6 +206,13 @@ class GloboDemoControls {
     }
 
     const config = this.guideStepConfigs.get(card.dataset.demoStep);
+    if (this.shouldSwitchToFashionBeforeGuideAction(config)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.navigateGuideActionToFashion(card);
+      return;
+    }
+
     if (this.shouldReturnToFashionForGuideFilter(config)) {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -414,6 +421,34 @@ class GloboDemoControls {
     const pending = this.readPendingLayoutGuideAction();
     this.removePendingLayoutGuideAction();
     if (!pending) return;
+
+    if (pending.action === 'run-fashion-guide-step') {
+      if (this.detectNavigationState().store !== 'fashion') return;
+
+      const stepId = typeof pending.stepId === 'string' ? pending.stepId : '';
+      const card = this.guideCards.find((guideCard) => guideCard.dataset.demoStep === stepId);
+      const config = this.guideStepConfigs.get(stepId);
+      if (!(card instanceof HTMLElement) || !config) return;
+
+      // render() normally applies these before pending actions run. Reapply
+      // here so a Theme Editor refresh cannot replay with stale store attrs.
+      this.updateGuideStepAttributes('fashion');
+
+      if (this.guideCardUsesToggleCheckboxFilter(card)) {
+        await this.waitForGuideCondition(
+          () => typeof window.toggleCheckboxFilter === 'function',
+          8000
+        );
+
+        if (typeof window.toggleCheckboxFilter !== 'function') return;
+      }
+
+      // Do not use clickGuideCard(): the replay must pass through the normal
+      // capture dispatcher so clear, focus, collection, and checked behavior
+      // stay identical to a direct click on the Fashion page.
+      card.click();
+      return;
+    }
 
     if (pending.action === 'run-fashion-filter-step') {
       const stepId = typeof pending.stepId === 'string' ? pending.stepId : '';
@@ -760,6 +795,11 @@ class GloboDemoControls {
     return /(?:toggleCheckboxFilter|clearAllFilter)\s*\(/.test(action);
   }
 
+  guideCardUsesToggleCheckboxFilter(card) {
+    const action = card.getAttribute('onclick') || '';
+    return /toggleCheckboxFilter\s*\(/.test(action);
+  }
+
   getGuideFocusSelector(config) {
     const guidedFocus = config?.guidedFocus || {};
     const configuredSelector = this.state.store === 'auto'
@@ -796,6 +836,11 @@ class GloboDemoControls {
       && this.getGuideFilterActions(config, 'fashion').length > 0;
   }
 
+  shouldSwitchToFashionBeforeGuideAction(config) {
+    return this.state.store === 'auto'
+      && config?.switchToFashionBeforeAction === true;
+  }
+
   hasGuideCustomAttribute(config, store) {
     if (config?.useCustomAttribute !== true) return false;
 
@@ -806,10 +851,22 @@ class GloboDemoControls {
   }
 
   navigateGuideFilterToFashion(card) {
+    this.navigateGuideActionToFashion(
+      card,
+      'run-fashion-filter-step',
+      this.mobileBreakpoint.matches
+    );
+  }
+
+  navigateGuideActionToFashion(
+    card,
+    pendingAction = 'run-fashion-guide-step',
+    useMobileSidebar = this.mobileBreakpoint.matches || this.state.device === 'mobile'
+  ) {
     const stepId = card.dataset.demoStep;
     if (!stepId) return;
 
-    const layout = this.mobileBreakpoint.matches
+    const layout = useMobileSidebar
       ? 'sidebar'
       : (FILTER_LAYOUTS.includes(this.toolbar.dataset.activeLayout)
         ? this.toolbar.dataset.activeLayout
@@ -822,7 +879,7 @@ class GloboDemoControls {
     if (!destination) return;
 
     this.startGuideAction(card);
-    this.writePendingLayoutGuideAction('run-fashion-filter-step', { stepId });
+    this.writePendingLayoutGuideAction(pendingAction, { stepId });
     this.state = {
       ...this.state,
       store: 'fashion',
