@@ -1376,6 +1376,9 @@ theme-store-id-2481.spf-has-filter:is(.spf-filter-tree-theme,:not(.spf-filter-tr
 
 
 /* YMM-css */
+[data-demo-store="fashion"] .gf-YMM-forms{
+    display: none !important;
+}
 .shopify-app-block:has(.gf-YMM-forms){
     width: 100% !important;
 }
