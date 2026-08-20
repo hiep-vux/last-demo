@@ -30,6 +30,7 @@ class GloboDemoControls {
     this.guideStepConfigs = this.readGuideStepConfigs();
     this.appliedGuideAttributes = new WeakMap();
     this.guideActionBypass = new WeakSet();
+    this.guideOpenPreservation = new WeakSet();
     this.guideActionsInProgress = new WeakSet();
     this.activeGuideCard = null;
     this.allowLayoutNavigation = false;
@@ -167,6 +168,7 @@ class GloboDemoControls {
     this.guideStepConfigs = this.readGuideStepConfigs();
     this.appliedGuideAttributes = new WeakMap();
     this.guideActionBypass = new WeakSet();
+    this.guideOpenPreservation = new WeakSet();
     this.guideActionsInProgress = new WeakSet();
     this.activeGuideCard = null;
 
@@ -201,10 +203,6 @@ class GloboDemoControls {
       return;
     }
 
-    if (this.mobileBreakpoint.matches && this.state.guideOpen) {
-      this.setState({ guideOpen: false });
-    }
-
     const config = this.guideStepConfigs.get(card.dataset.demoStep);
     if (this.shouldSwitchToFashionBeforeGuideAction(config)) {
       event.preventDefault();
@@ -218,6 +216,12 @@ class GloboDemoControls {
       event.stopImmediatePropagation();
       this.navigateGuideFilterToFashion(card);
       return;
+    }
+
+    const preserveGuideOpen = this.guideOpenPreservation.has(card);
+    this.guideOpenPreservation.delete(card);
+    if (!preserveGuideOpen && this.mobileBreakpoint.matches && this.state.guideOpen) {
+      this.setState({ guideOpen: false });
     }
 
     if (config?.collectionToggle?.enabled === true) {
@@ -446,6 +450,7 @@ class GloboDemoControls {
       // Do not use clickGuideCard(): the replay must pass through the normal
       // capture dispatcher so clear, focus, collection, and checked behavior
       // stay identical to a direct click on the Fashion page.
+      if (this.state.guideOpen) this.guideOpenPreservation.add(card);
       card.click();
       return;
     }
@@ -884,7 +889,6 @@ class GloboDemoControls {
       ...this.state,
       store: 'fashion',
       device: this.mobileBreakpoint.matches ? 'mobile' : this.state.device,
-      guideOpen: false,
     };
     this.persistState();
 
