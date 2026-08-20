@@ -1384,7 +1384,7 @@ theme-store-id-2481.spf-has-filter:is(.spf-filter-tree-theme,:not(.spf-filter-tr
 }
 #gpf-demo .gf-YMM-forms.loaded {
     max-width: 100%;
-    margin-bottom: 22px;
+    margin: 22px 0;
     padding: 22px 24px;
     border-radius: 14px;
     background: #f6f6f4 !important;
