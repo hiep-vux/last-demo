@@ -134,7 +134,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "toggleCheckboxFilter('materia', 'Glitter' )",
+            "fashion_attribute_value": "toggleCheckboxFilter('material', 'Glitter' )",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
