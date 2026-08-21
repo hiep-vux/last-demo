@@ -229,6 +229,9 @@ button.gl-d-close-btn {
     border-radius: 2px !important;
     padding: 2px 8px !important;
   }
+  .gl-col-left {
+      margin-bottom: 0 !important;
+  }
 }
 
 /* Demo search-layout switcher. The app keeps ownership of search data and
