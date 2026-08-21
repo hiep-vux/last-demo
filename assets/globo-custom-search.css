@@ -97,7 +97,7 @@ button.gl-d-close-btn {
     color: #a3a39f !important;
     text-decoration: none !important;
 }
-.gl-fullscreen-layer .gl-fullscreen-results__meta a::hover{
+.gl-fullscreen-layer .gl-fullscreen-results__meta a:hover{
   color: #171717 !important;
 }
 .gl-fullscreen-layer .gl-fullscreen-top-searches ul li a {
