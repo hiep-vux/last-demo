@@ -221,6 +221,7 @@ button.gl-d-close-btn {
   }
   .gl-fullscreen-layer .gl-fullscreen-results__meta {
     margin-bottom: 0 !important;
+    padding-top: 0 !important;
   }
   #glFilter-search-popup .gl-fullscreen-layer .gl-fullscreen-top-searches ul li a {
     border-radius: 2px !important;
