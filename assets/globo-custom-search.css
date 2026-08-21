@@ -214,7 +214,7 @@ button.gl-d-close-btn {
 }
 @media(max-width: 768px){
   .gl-filter-search-fullscreen .gl-fullscreen-layer .gl-fullscreen-top-searches {
-      padding: 22px 0 !important;
+      padding: 22px 0 0 !important;
   }
   .gl-fullscreen-layer .gl-list__group {
       margin-bottom: 0 !important;
