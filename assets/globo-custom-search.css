@@ -70,7 +70,7 @@ button.gl-d-close-btn {
     width: 35px;
     padding: 0 !important;
 }
-.gl-filter-search-fullscreen .gl-fullscreen-layer .gl-fullscreen-suggestions div {
+.gl-filter-search-fullscreen .gl-fullscreen-layer .gl-fullscreen-suggestions div.gl-popular-search-terms {
     padding: 24px;
 }
 
@@ -206,7 +206,7 @@ button.gl-d-close-btn {
         border-right: 1px solid rgb(242, 242, 240);
     }
 
-    .gl-filter-search-fullscreen .gl-fullscreen-layer .gl-fullscreen-suggestions div {
+    .gl-filter-search-fullscreen .gl-fullscreen-layer .gl-fullscreen-suggestions div.gl-popular-search-terms {
         padding: 24px 39px 0 !important;
     }
 
