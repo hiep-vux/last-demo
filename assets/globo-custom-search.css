@@ -95,7 +95,10 @@ button.gl-d-close-btn {
 .gl-fullscreen-layer .gl-fullscreen-results__meta a {
     font-size: 13.5px !important;
     color: #a3a39f !important;
-    text-decoration: none;
+    text-decoration: none !important;
+}
+.gl-fullscreen-layer .gl-fullscreen-results__meta a::hover{
+  color: #171717 !important;
 }
 .gl-fullscreen-layer .gl-fullscreen-top-searches ul li a {
     font-size: 16px !important;
