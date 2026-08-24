@@ -4,8 +4,13 @@ const ACTIVE_CLASS = 'gpf-demo-segmented-control__button--active';
 const DEMO_SESSION_KEY = 'globo-demo:session-state';
 const DEMO_LAYOUT_GUIDE_KEY = 'globo-demo:pending-layout-guide';
 const DEMO_CURRENCY_DEFAULT_KEY = 'globo-demo:currency-default';
+const DEMO_SEARCH_DROPDOWN_LAYOUT_KEY = 'globo-demo:search-dropdown-layout';
 const FILTER_LAYOUTS = ['sidebar', 'horizontal', 'drawer'];
 const SEARCH_LAYOUTS = ['overlay', 'two-column', 'one-column'];
+const SEARCH_DROPDOWN_LAYOUTS = {
+  2: 'two-column',
+  3: 'one-column',
+};
 const SEARCH_LAYOUT_GUIDE_STEPS = {
   'sl-two': 'two-column',
   'sl-one': 'one-column',
@@ -116,6 +121,7 @@ class GloboDemoControls {
     this.updateGuideProgress();
     this.render({ emit: false });
     this.runStoreCustomScript(this.state.store);
+    this.applySearchDropdownLayoutOverride();
     this.runPendingLayoutGuideAction().catch((error) => {
       console.error('[globo-demo] Pending layout Guide action failed.', error);
     });
@@ -1218,6 +1224,92 @@ class GloboDemoControls {
     }
   }
 
+  readSearchDropdownLayoutOverride() {
+    try {
+      const stored = window.sessionStorage.getItem(DEMO_SEARCH_DROPDOWN_LAYOUT_KEY);
+      const override = stored ? JSON.parse(stored) : null;
+      const layout = Number(override?.layout);
+      if (!Object.prototype.hasOwnProperty.call(SEARCH_DROPDOWN_LAYOUTS, layout)) return null;
+
+      return {
+        layout,
+        stepId: typeof override.stepId === 'string' ? override.stepId : '',
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  writeSearchDropdownLayoutOverride(layout, stepId) {
+    try {
+      window.sessionStorage.setItem(
+        DEMO_SEARCH_DROPDOWN_LAYOUT_KEY,
+        JSON.stringify({ layout, stepId })
+      );
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  clearSearchDropdownLayoutOverride() {
+    const hadOverride = this.readSearchDropdownLayoutOverride() !== null;
+
+    try {
+      window.sessionStorage.removeItem(DEMO_SEARCH_DROPDOWN_LAYOUT_KEY);
+    } catch (error) {
+      // sessionStorage may be unavailable in privacy-restricted browsers.
+    }
+
+    return hadOverride;
+  }
+
+  applySearchDropdownLayoutOverride(attempt = 0) {
+    const override = this.readSearchDropdownLayoutOverride();
+    if (!override || this.state.store !== 'fashion') return;
+
+    const searchConfig = window.GloboEmbedFilterConfig?.search;
+    if (searchConfig && typeof searchConfig === 'object') {
+      searchConfig.layout = override.layout;
+      return;
+    }
+
+    if (attempt < 120) {
+      window.requestAnimationFrame(() => this.applySearchDropdownLayoutOverride(attempt + 1));
+    }
+  }
+
+  toggleSearchDropdownLayout(card, layout) {
+    if (!(card instanceof HTMLElement)) return;
+
+    const stepId = card.dataset.demoStep;
+    const normalizedLayout = Number(layout);
+    const demoLayout = SEARCH_DROPDOWN_LAYOUTS[normalizedLayout];
+    if (!stepId || !demoLayout) return;
+
+    const wasCompleted = this.doneSteps.has(stepId);
+    if (wasCompleted) {
+      this.clearSearchDropdownLayoutOverride();
+      this.state = { ...this.state, searchLayout: this.defaults.searchLayout };
+    } else {
+      const previousOverride = this.readSearchDropdownLayoutOverride();
+      if (previousOverride?.stepId && previousOverride.stepId !== stepId) {
+        this.doneSteps.delete(previousOverride.stepId);
+        this.restoreGuideProgress();
+        this.updateGuideProgress();
+      }
+
+      if (!this.writeSearchDropdownLayoutOverride(normalizedLayout, stepId)) return;
+      this.state = { ...this.state, searchLayout: demoLayout };
+    }
+
+    this.persistState();
+    this.startGuideAction(card);
+
+    // Let the normal bubbling Guide handler persist check/uncheck first.
+    window.setTimeout(() => window.location.reload(), 0);
+  }
+
   /** @param {MouseEvent} event */
   handleClick(event) {
     const target = event.target instanceof Element
@@ -1486,6 +1578,7 @@ class GloboDemoControls {
   reset() {
     const { guideOpen } = this.state;
     const previous = { ...this.state };
+    const hadSearchDropdownOverride = this.clearSearchDropdownLayoutOverride();
     this.resetGuideProgress();
     this.desktopLayout = 'sidebar';
     this.toolbar.dataset.activeLayout = 'sidebar';
@@ -1507,6 +1600,11 @@ class GloboDemoControls {
         window.location.assign(targetUrl.href);
         return;
       }
+    }
+
+    if (hadSearchDropdownOverride) {
+      window.location.reload();
+      return;
     }
 
     this.clearActiveFilters();

@@ -15,6 +15,7 @@
           store: 'fashion',
           device: isMobileViewport ? 'mobile' : 'desktop',
           desktopLayout: 'sidebar',
+          searchLayout: null,
           guideOpen: defaultGuideOpen,
           doneSteps: [],
         };
@@ -42,6 +43,9 @@
             desktopLayout: ['sidebar', 'horizontal', 'drawer'].includes(storedState.desktopLayout)
               ? storedState.desktopLayout
               : 'sidebar',
+            searchLayout: ['overlay', 'two-column', 'one-column'].includes(storedState.searchLayout)
+              ? storedState.searchLayout
+              : null,
             guideOpen: typeof storedState.guideOpen === 'boolean' ? storedState.guideOpen : defaultGuideOpen,
             doneSteps: Array.isArray(storedState.doneSteps) ? storedState.doneSteps : [],
           };
