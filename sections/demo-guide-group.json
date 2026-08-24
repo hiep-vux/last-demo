@@ -260,9 +260,9 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, '')",
             "auto_attribute_name": "onclick",
-            "auto_attribute_value": "document.querySelector('.globo-search-activator')?.click();",
+            "auto_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, '')",
             "store": "all"
           }
         },
@@ -290,7 +290,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();    setTimeout(() => {      const input = document.querySelector('#gl-d-searchbox-input');      if (!input) return;      input.value = 's';      input.dispatchEvent(new Event('input', { bubbles: true }));      input.focus();    }, 100);",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, 's')",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
@@ -320,7 +320,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();    setTimeout(() => {      const input = document.querySelector('#gl-d-searchbox-input');      if (!input) return;      input.value = 'black party heels for wedding';      input.dispatchEvent(new Event('input', { bubbles: true }));      input.focus();    }, 100);",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, 'black party heels for wedding')",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
@@ -350,7 +350,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();    setTimeout(() => {      const input = document.querySelector('#gl-d-searchbox-input');      if (!input) return;      input.value = 'hell';      input.dispatchEvent(new Event('input', { bubbles: true }));      input.focus();    }, 100);",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, 'hell')",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
@@ -470,7 +470,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();    setTimeout(() => {      const input = document.querySelector('#gl-d-searchbox-input');      if (!input) return;      input.value = 'sport';      input.dispatchEvent(new Event('input', { bubbles: true }));      input.focus();    }, 100);",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, 'sport')",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
@@ -500,7 +500,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();setTimeout(() => {  const input = document.querySelector('#gl-d-searchbox-input');  if (!input) return;  input.value = 'sandals';  input.dispatchEvent(new Event('input', { bubbles: true }));  input.focus();  const interval = setInterval(() => {    document      .querySelector('#gl-products-0')      ?.classList.add('gl-pinning-product');  }, 100);  setTimeout(() => {    clearInterval(interval);  }, 1000);}, 100);",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, 'sandals', { pinFirstProduct: true })",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
@@ -530,7 +530,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "document.querySelector('.globo-search-activator')?.click();    setTimeout(() => {      const input = document.querySelector('#gl-d-searchbox-input');      if (!input) return;      input.value = 'dsdsa';      input.dispatchEvent(new Event('input', { bubbles: true }));      input.focus();    }, 100);",
+            "fashion_attribute_value": "window.globoDemoControls?.runGuideSearchQuery(this, 'dsdsa')",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"

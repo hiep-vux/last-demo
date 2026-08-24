@@ -9,8 +9,8 @@ const DEMO_GUIDE_POSITION_KEY = 'globo-demo:pending-guide-position';
 const FILTER_LAYOUTS = ['sidebar', 'horizontal', 'drawer'];
 const SEARCH_LAYOUTS = ['overlay', 'two-column', 'one-column'];
 const SEARCH_DROPDOWN_LAYOUTS = {
-  2: 'two-column',
-  3: 'one-column',
+  2: 'one-column',
+  3: 'two-column',
 };
 const SEARCH_LAYOUT_GUIDE_STEPS = {
   'sl-two': 'two-column',
@@ -37,6 +37,7 @@ class GloboDemoControls {
     this.appliedGuideAttributes = new WeakMap();
     this.guideActionBypass = new WeakSet();
     this.guideOpenPreservation = new WeakSet();
+    this.guideSearchActions = new WeakMap();
     this.guideActionsInProgress = new WeakSet();
     this.activeGuideCard = null;
     this.allowLayoutNavigation = false;
@@ -177,6 +178,7 @@ class GloboDemoControls {
     this.appliedGuideAttributes = new WeakMap();
     this.guideActionBypass = new WeakSet();
     this.guideOpenPreservation = new WeakSet();
+    this.guideSearchActions = new WeakMap();
     this.guideActionsInProgress = new WeakSet();
     this.activeGuideCard = null;
 
@@ -210,6 +212,8 @@ class GloboDemoControls {
       event.stopImmediatePropagation();
       return;
     }
+
+    this.writePendingGuidePosition(card);
 
     const config = this.guideStepConfigs.get(card.dataset.demoStep);
     if (this.shouldSwitchToFashionBeforeGuideAction(config)) {
@@ -689,8 +693,15 @@ class GloboDemoControls {
         const waitsForFilter = this.guideCardUsesFilterAction(card);
         const renderCompleted = waitsForFilter ? this.waitForFilterRender(1400) : null;
         this.clickGuideCard(card);
-        if (renderCompleted) await renderCompleted;
-        else await this.wait(100);
+        const searchAction = this.guideSearchActions.get(card);
+        let searchInput = null;
+        if (renderCompleted) {
+          await renderCompleted;
+        } else if (searchAction) {
+          searchInput = await searchAction;
+        } else {
+          await this.wait(100);
+        }
 
         target?.classList.remove('gpf-demo-action-highlight', 'gpf-demo-action-highlight--pending');
 
@@ -701,6 +712,8 @@ class GloboDemoControls {
           );
           target = this.queryGuideSelectedItem(filterActions[0].selector)
             || this.findGuideFocusTarget(selector);
+        } else if (searchInput instanceof HTMLElement) {
+          target = searchInput;
         } else {
           target = this.findGuideFocusTarget(selector);
         }
@@ -941,7 +954,6 @@ class GloboDemoControls {
 
     if (!destination) return;
 
-    this.writePendingGuidePosition(card);
     this.startGuideAction(card);
     this.writePendingLayoutGuideAction(pendingAction, { stepId });
     this.state = {
@@ -1277,6 +1289,110 @@ class GloboDemoControls {
     }
   }
 
+  runGuideSearchQuery(card, query = '', options = {}) {
+    if (!(card instanceof HTMLElement)) return Promise.resolve(null);
+
+    const action = this.executeGuideSearchQuery(query, options).catch((error) => {
+      console.error('[globo-demo] Guide search action failed.', error);
+      return null;
+    });
+    this.guideSearchActions.set(card, action);
+    action.then(() => {
+      if (this.guideSearchActions.get(card) === action) {
+        this.guideSearchActions.delete(card);
+      }
+    });
+
+    return action;
+  }
+
+  async executeGuideSearchQuery(query, options) {
+    const findVisibleHeaderInput = () => Array.from(document.querySelectorAll(
+      '.demo-store-header__search-button .demo-store-header__search-input'
+    )).find((input) => this.isVisibleGuideElement(input));
+    const effectiveLayout = this.root?.dataset.demoSearchLayout || 'overlay';
+    const usesHeaderInput = ['one-column', 'two-column'].includes(effectiveLayout);
+    let input = findVisibleHeaderInput();
+
+    if (!(input instanceof HTMLInputElement)) {
+      await this.waitForGuideCondition(
+        () => findVisibleHeaderInput() instanceof HTMLInputElement,
+        4000
+      );
+      input = findVisibleHeaderInput();
+    }
+
+    if (!usesHeaderInput) {
+      const findVisibleOverlayInput = () => Array.from(
+        document.querySelectorAll('#gl-d-searchbox-input')
+      ).find((overlayInput) => this.isVisibleGuideElement(overlayInput));
+      let overlayInput = findVisibleOverlayInput();
+
+      if (!(overlayInput instanceof HTMLInputElement)) {
+        const form = input instanceof HTMLInputElement
+          ? input.closest('.demo-store-header__search-button')
+          : null;
+        const activator = form?.querySelector('.globo-search-activator')
+          || document.querySelector('.globo-search-activator');
+        if (activator instanceof HTMLElement) activator.click();
+
+        await this.waitForGuideCondition(
+          () => findVisibleOverlayInput() instanceof HTMLInputElement,
+          6000
+        );
+        overlayInput = findVisibleOverlayInput();
+      }
+
+      input = overlayInput;
+    }
+
+    if (!(input instanceof HTMLInputElement)) return null;
+
+    const headerForm = usesHeaderInput
+      ? input.closest('.demo-store-header__search-button')
+      : null;
+    const formHadTabindex = headerForm instanceof HTMLElement
+      ? headerForm.hasAttribute('tabindex')
+      : true;
+    if (headerForm instanceof HTMLElement) {
+      if (!formHadTabindex) headerForm.setAttribute('tabindex', '-1');
+      try {
+        headerForm.focus({ preventScroll: true });
+      } catch (error) {
+        headerForm.focus();
+      }
+    }
+
+    try {
+      input.focus({ preventScroll: true });
+    } catch (error) {
+      input.focus();
+    }
+    if (headerForm instanceof HTMLElement && !formHadTabindex) {
+      headerForm.removeAttribute('tabindex');
+    }
+
+    input.value = String(query ?? '');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    if (options?.pinFirstProduct === true) {
+      this.pinFirstGuideSearchProduct();
+    }
+
+    return input;
+  }
+
+  pinFirstGuideSearchProduct() {
+    const startedAt = performance.now();
+    const pinProduct = () => {
+      document.querySelector('#gl-products-0')?.classList.add('gl-pinning-product');
+      if (performance.now() - startedAt < 1000) {
+        window.setTimeout(pinProduct, 100);
+      }
+    };
+    pinProduct();
+  }
+
   readSearchDropdownLayoutOverride() {
     try {
       const stored = window.sessionStorage.getItem(DEMO_SEARCH_DROPDOWN_LAYOUT_KEY);
@@ -1356,7 +1472,6 @@ class GloboDemoControls {
       this.state = { ...this.state, searchLayout: demoLayout };
     }
 
-    this.writePendingGuidePosition(card);
     this.persistState();
     this.startGuideAction(card);
 
@@ -1385,7 +1500,6 @@ class GloboDemoControls {
     }
 
     this.state = { ...this.state, searchLayout: this.defaults.searchLayout };
-    this.writePendingGuidePosition(card);
     this.persistState();
     this.startGuideAction(card);
 
