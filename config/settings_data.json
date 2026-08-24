@@ -167,7 +167,7 @@
         "settings": {
           "productGridSelector": "",
           "useCustomQuickviewTemplate": true,
-          "customJs": "GloboEmbedFilterConfig.search.layout = 2",
+          "customJs": "GloboEmbedFilterConfig.search.layout = 3",
           "customCss": "div#qab_background {\n    display: none !important;\n}",
           "customProductTemplateLoader": "",
           "customTreeTemplateLoader": "",
