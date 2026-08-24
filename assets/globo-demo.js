@@ -5,6 +5,7 @@ const DEMO_SESSION_KEY = 'globo-demo:session-state';
 const DEMO_LAYOUT_GUIDE_KEY = 'globo-demo:pending-layout-guide';
 const DEMO_CURRENCY_DEFAULT_KEY = 'globo-demo:currency-default';
 const DEMO_SEARCH_DROPDOWN_LAYOUT_KEY = 'globo-demo:search-dropdown-layout';
+const DEMO_GUIDE_POSITION_KEY = 'globo-demo:pending-guide-position';
 const FILTER_LAYOUTS = ['sidebar', 'horizontal', 'drawer'];
 const SEARCH_LAYOUTS = ['overlay', 'two-column', 'one-column'];
 const SEARCH_DROPDOWN_LAYOUTS = {
@@ -120,6 +121,7 @@ class GloboDemoControls {
     this.restoreGuideProgress();
     this.updateGuideProgress();
     this.render({ emit: false });
+    this.restorePendingGuidePosition();
     this.runStoreCustomScript(this.state.store);
     this.applySearchDropdownLayoutOverride();
     this.runPendingLayoutGuideAction().catch((error) => {
@@ -425,6 +427,56 @@ class GloboDemoControls {
     } catch (error) {
       // sessionStorage may be unavailable in privacy-restricted browsers.
     }
+  }
+
+  writePendingGuidePosition(card) {
+    if (!(card instanceof HTMLElement) || !(this.guide instanceof HTMLElement)) return;
+
+    try {
+      const guideRect = this.guide.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      window.sessionStorage.setItem(
+        DEMO_GUIDE_POSITION_KEY,
+        JSON.stringify({
+          stepId: card.dataset.demoStep || '',
+          scrollTop: this.guide.scrollTop,
+          viewportOffset: cardRect.top - guideRect.top,
+          createdAt: Date.now(),
+        })
+      );
+    } catch (error) {
+      // Continue with the action when sessionStorage is unavailable.
+    }
+  }
+
+  restorePendingGuidePosition() {
+    if (!(this.guide instanceof HTMLElement)) return;
+
+    let pending = null;
+    try {
+      const stored = window.sessionStorage.getItem(DEMO_GUIDE_POSITION_KEY);
+      pending = stored ? JSON.parse(stored) : null;
+      window.sessionStorage.removeItem(DEMO_GUIDE_POSITION_KEY);
+    } catch (error) {
+      return;
+    }
+
+    if (!pending || Date.now() - Number(pending.createdAt) > 15000) return;
+
+    const card = this.guideCards.find((guideCard) => (
+      guideCard.dataset.demoStep === pending.stepId
+    ));
+    if (!(card instanceof HTMLElement)) return;
+
+    const scrollTop = Number(pending.scrollTop);
+    if (Number.isFinite(scrollTop)) this.guide.scrollTop = scrollTop;
+
+    const viewportOffset = Number(pending.viewportOffset);
+    if (!Number.isFinite(viewportOffset)) return;
+
+    const guideRect = this.guide.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    this.guide.scrollTop += cardRect.top - guideRect.top - viewportOffset;
   }
 
   async runPendingLayoutGuideAction() {
@@ -889,6 +941,7 @@ class GloboDemoControls {
 
     if (!destination) return;
 
+    this.writePendingGuidePosition(card);
     this.startGuideAction(card);
     this.writePendingLayoutGuideAction(pendingAction, { stepId });
     this.state = {
@@ -1228,13 +1281,13 @@ class GloboDemoControls {
     try {
       const stored = window.sessionStorage.getItem(DEMO_SEARCH_DROPDOWN_LAYOUT_KEY);
       const override = stored ? JSON.parse(stored) : null;
+      const stepId = typeof override?.stepId === 'string' ? override.stepId : '';
+      if (override?.layout === null && stepId) return { layout: null, stepId };
+
       const layout = Number(override?.layout);
       if (!Object.prototype.hasOwnProperty.call(SEARCH_DROPDOWN_LAYOUTS, layout)) return null;
 
-      return {
-        layout,
-        stepId: typeof override.stepId === 'string' ? override.stepId : '',
-      };
+      return { layout, stepId };
     } catch (error) {
       return null;
     }
@@ -1266,7 +1319,7 @@ class GloboDemoControls {
 
   applySearchDropdownLayoutOverride(attempt = 0) {
     const override = this.readSearchDropdownLayoutOverride();
-    if (!override || this.state.store !== 'fashion') return;
+    if (!override || override.layout === null || this.state.store !== 'fashion') return;
 
     const searchConfig = window.GloboEmbedFilterConfig?.search;
     if (searchConfig && typeof searchConfig === 'object') {
@@ -1303,6 +1356,36 @@ class GloboDemoControls {
       this.state = { ...this.state, searchLayout: demoLayout };
     }
 
+    this.writePendingGuidePosition(card);
+    this.persistState();
+    this.startGuideAction(card);
+
+    // Let the normal bubbling Guide handler persist check/uncheck first.
+    window.setTimeout(() => window.location.reload(), 0);
+  }
+
+  resetSearchDropdownLayout(card) {
+    if (!(card instanceof HTMLElement)) return;
+
+    const stepId = card.dataset.demoStep;
+    if (!stepId) return;
+
+    const wasCompleted = this.doneSteps.has(stepId);
+    const previousOverride = this.readSearchDropdownLayoutOverride();
+    if (previousOverride?.stepId && previousOverride.stepId !== stepId) {
+      this.doneSteps.delete(previousOverride.stepId);
+      this.restoreGuideProgress();
+      this.updateGuideProgress();
+    }
+
+    if (wasCompleted) {
+      this.clearSearchDropdownLayoutOverride();
+    } else if (!this.writeSearchDropdownLayoutOverride(null, stepId)) {
+      return;
+    }
+
+    this.state = { ...this.state, searchLayout: this.defaults.searchLayout };
+    this.writePendingGuidePosition(card);
     this.persistState();
     this.startGuideAction(card);
 
