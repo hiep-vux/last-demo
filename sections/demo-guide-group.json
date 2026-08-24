@@ -380,7 +380,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "window.globoDemoControls?.toggleSearchDropdownLayout(this, 2)",
+            "fashion_attribute_value": "window.globoDemoControls?.toggleSearchDropdownLayout(this, 3)",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
@@ -410,7 +410,7 @@
             "focus_scroll_back": false,
             "focus_scroll_back_destination": "original",
             "fashion_attribute_name": "onclick",
-            "fashion_attribute_value": "window.globoDemoControls?.toggleSearchDropdownLayout(this, 3)",
+            "fashion_attribute_value": "window.globoDemoControls?.toggleSearchDropdownLayout(this, 2)",
             "auto_attribute_name": "",
             "auto_attribute_value": "",
             "store": "all"
